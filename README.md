@@ -39,17 +39,25 @@ python backend/data/generate_data.py   # generates the synthetic datasets
 
 ## Run
 
-**Dashboard (main demo surface):**
-```bash
-source venv/bin/activate
-streamlit run frontend/app.py
-```
-
-**API (optional, shows the platform's service layer for the architecture diagram):**
+**1. API backend (required — the React dashboard calls this):**
 ```bash
 source venv/bin/activate
 uvicorn backend.api.main:app --reload
 # docs at http://localhost:8000/docs
+```
+
+**2. Dashboard (main demo surface, React):**
+```bash
+cd frontend
+npm install
+npm run dev
+# opens at http://localhost:5173, proxies /api to the backend above
+```
+
+**Streamlit version** (kept as a lightweight backup demo, imports agents directly — no API needed):
+```bash
+source venv/bin/activate
+streamlit run streamlit_app/app.py
 ```
 
 ## Project structure
@@ -68,8 +76,12 @@ backend/
     orchestrator.py            # Groq chat agent with tool access
   api/
     main.py                    # FastAPI REST layer
-frontend/
-  app.py                       # Streamlit dashboard
+frontend/                      # React (Vite + Tailwind + Recharts) dashboard
+  src/
+    api.js                     # API client
+    components/                # one component per dashboard section
+streamlit_app/
+  app.py                       # backup Streamlit dashboard (no API required)
 ```
 
 ## Demo narrative
