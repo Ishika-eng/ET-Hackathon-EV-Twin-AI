@@ -38,11 +38,13 @@ def compute_risk_score(row):
 
 
 def risk_tier(score):
-    if score >= 70:
+    # thresholds calibrated against the composite score's actual range (~15-70)
+    # so all four tiers are populated instead of "Critical" sitting empty
+    if score >= 60:
         return "Critical"
-    if score >= 50:
+    if score >= 48:
         return "High"
-    if score >= 30:
+    if score >= 32:
         return "Medium"
     return "Low"
 

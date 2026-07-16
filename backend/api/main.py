@@ -1,4 +1,6 @@
 """FastAPI backend exposing the 3 agents + orchestrator chat as a REST API."""
+import json
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -15,10 +17,17 @@ app.add_middleware(
 )
 
 
+def df_records(df):
+    """Convert a DataFrame to JSON-safe records. pandas.to_json emits `null`
+    for NaN (unlike .to_dict(), which leaves NaN floats that Starlette's
+    stricter JSON encoder rejects outright)."""
+    return json.loads(df.to_json(orient="records"))
+
+
 @app.get("/api/procurement/fleet")
 def get_procurement_fleet():
     df = procurement_agent.analyze_fleet()
-    return df.to_dict(orient="records")
+    return df_records(df)
 
 
 @app.get("/api/procurement/plan")
@@ -29,7 +38,7 @@ def get_procurement_plan(phase_size: int = 20):
 @app.get("/api/health/fleet")
 def get_health_fleet():
     df = fleet_health_agent.analyze_fleet_health()
-    return df.to_dict(orient="records")
+    return df_records(df)
 
 
 @app.get("/api/health/validation")
@@ -40,12 +49,12 @@ def get_health_validation():
 @app.get("/api/supply-chain/suppliers")
 def get_suppliers():
     df = supply_chain_agent.analyze_supply_chain()
-    return df.to_dict(orient="records")
+    return df_records(df)
 
 
 @app.get("/api/supply-chain/concentration")
 def get_concentration():
-    return supply_chain_agent.material_concentration_summary().to_dict(orient="records")
+    return df_records(supply_chain_agent.material_concentration_summary())
 
 
 @app.get("/api/supply-chain/lead-time")
@@ -60,7 +69,7 @@ def get_carbon_summary():
 
 @app.get("/api/carbon/top-impact")
 def get_top_impact(n: int = 10):
-    return carbon_intelligence.top_carbon_impact_vehicles(n=n).to_dict(orient="records")
+    return df_records(carbon_intelligence.top_carbon_impact_vehicles(n=n))
 
 
 class ChatRequest(BaseModel):
@@ -74,6 +83,8 @@ def chat(req: ChatRequest):
         reply = orchestrator.chat(req.message, history=req.history)
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        raise HTTPException(status_code=502, detail="The chat agent failed to respond -- please try rephrasing your question.")
     return {"reply": reply}
 
 

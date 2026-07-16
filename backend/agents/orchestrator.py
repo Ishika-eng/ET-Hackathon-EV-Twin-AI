@@ -7,7 +7,7 @@ compute predictions itself, only narrates/prioritizes what the other agents
 already produced.
 """
 import json
-from groq import Groq
+from groq import Groq, BadRequestError
 
 from backend.config import GROQ_API_KEY, GROQ_MODEL
 from backend.agents import procurement_agent, fleet_health_agent, supply_chain_agent, carbon_intelligence
@@ -142,13 +142,25 @@ def chat(user_message: str, history=None):
     messages.append({"role": "user", "content": user_message})
 
     for _ in range(5):  # tool-call loop guard
-        response = client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=messages,
-            tools=TOOLS,
-            tool_choice="auto",
-            temperature=0.3,
-        )
+        # the model occasionally emits malformed function-call syntax (a known
+        # quirk of tool-calling on this model); a retry almost always succeeds
+        # since generation is stochastic
+        response = None
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = client.chat.completions.create(
+                    model=GROQ_MODEL,
+                    messages=messages,
+                    tools=TOOLS,
+                    tool_choice="auto",
+                    temperature=0.3,
+                )
+                break
+            except BadRequestError as e:
+                last_error = e
+        if response is None:
+            raise last_error
         msg = response.choices[0].message
 
         if not msg.tool_calls:
@@ -159,7 +171,7 @@ def chat(user_message: str, history=None):
         ]})
 
         for tc in msg.tool_calls:
-            args = json.loads(tc.function.arguments or "{}")
+            args = json.loads(tc.function.arguments or "{}") or {}
             try:
                 result = _TOOL_IMPL[tc.function.name](**args)
             except Exception as e:

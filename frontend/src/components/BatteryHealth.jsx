@@ -39,9 +39,9 @@ export default function BatteryHealth() {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#223052" />
             <XAxis dataKey="vehicle_id" stroke="#8b98b8" fontSize={10} interval={2} />
-            <YAxis domain={[50, 100]} stroke="#8b98b8" fontSize={12} />
+            <YAxis domain={[0, 100]} stroke="#8b98b8" fontSize={12} />
             <Tooltip contentStyle={{ background: "#121a2e", border: "1px solid #223052" }} />
-            <Bar dataKey="current_soh_pct" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="current_soh_pct" fill="#3b82f6" radius={[4, 4, 0, 0]}>
               {chartData.map((r) => (
                 <Cell key={r.vehicle_id} fill={r.thermal_anomaly ? "#f6584f" : "#3b82f6"} />
               ))}

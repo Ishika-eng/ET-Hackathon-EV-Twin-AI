@@ -111,8 +111,8 @@ def generate_battery_telemetry(fleet_df):
         k_cycle = rng.uniform(0.006, 0.014)
         k_thermal = rng.uniform(0.08, 0.25)
         k_fastcharge = rng.uniform(2.0, 6.0)
-        fast_charge_bias = rng.uniform(0.1, 0.5)  # this vehicle's typical fast-charge ratio
-        base_temp = rng.uniform(28, 38)
+        fast_charge_bias = rng.uniform(0.1, 0.6)  # this vehicle's typical fast-charge ratio
+        base_temp = rng.uniform(24, 34)
 
         cycles = 0.0
         true_soh = 100.0
@@ -124,7 +124,9 @@ def generate_battery_telemetry(fleet_df):
             cycles += cycles_today
 
             fast_charge_ratio = np.clip(rng.normal(fast_charge_bias, 0.1), 0, 1)
-            max_temp = base_temp + rng.uniform(0, 12) + (8 if fast_charge_ratio > 0.5 else 0)
+            # only vehicles that fast-charge heavily push into anomaly territory --
+            # keeps thermal risk a distinguishing signal rather than fleet-wide noise
+            max_temp = base_temp + rng.uniform(0, 8) + (10 if fast_charge_ratio > 0.55 else 0)
             avg_temp = base_temp + rng.uniform(-2, 4)
             dod = np.clip(rng.normal(0.6, 0.15), 0.1, 1.0)
 
