@@ -106,12 +106,19 @@ def analyze_fleet():
         candidates = oem[oem.segment == veh.vehicle_type]
         if candidates.empty:
             continue
-        best_score, best_breakdown, best_oem, best_savings = -1, None, None, None
+        best_score, best_breakdown, best_oem, best_savings, best_rank = -1, None, None, None, None
         for _, oem_row in candidates.iterrows():
             score, breakdown = score_vehicle(veh, oem_row)
-            if score > best_score:
-                best_score, best_breakdown, best_oem = score, breakdown, oem_row
-                best_savings = compute_savings(veh, oem_row)
+            savings = compute_savings(veh, oem_row)
+            # operational fit drives the match, but within a 5-point band treat
+            # scores as tied and prefer the OEM with the better payback --
+            # otherwise a vehicle can get a top readiness score paired with a
+            # decades-long payback, which reads as broken even though each
+            # number is individually correct
+            payback = savings["payback_years"]
+            rank = (round(score / 5), -(payback if payback is not None else 1e9))
+            if best_rank is None or rank > best_rank:
+                best_score, best_breakdown, best_oem, best_savings, best_rank = score, breakdown, oem_row, savings, rank
 
         results.append({
             "vehicle_id": veh.vehicle_id,

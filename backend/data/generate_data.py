@@ -26,13 +26,13 @@ rng = np.random.default_rng(SEED)
 OUT_DIR = os.path.dirname(__file__)
 
 VEHICLE_TYPES = [
-    # type, count_weight, distance_range_km, payload_range_ton, duty_hours_range
-    ("Intra-plant Tug", 0.20, (10, 40), (0.5, 2.0), (6, 10)),
-    ("Last-mile Delivery Van", 0.25, (60, 140), (0.5, 2.5), (8, 12)),
-    ("Freight Truck", 0.20, (100, 300), (3.0, 9.0), (8, 14)),
-    ("Mining Haul Vehicle", 0.15, (30, 90), (10.0, 25.0), (10, 18)),
-    ("Construction Equipment Carrier", 0.10, (20, 60), (5.0, 15.0), (6, 12)),
-    ("Forklift / Warehouse Vehicle", 0.10, (5, 25), (0.5, 3.0), (8, 16)),
+    # type, count_weight, distance_range_km, payload_range_ton, duty_hours_range, fuel_consumption_range_l_per_100km
+    ("Intra-plant Tug", 0.20, (10, 40), (0.5, 2.0), (6, 10), (8, 16)),
+    ("Last-mile Delivery Van", 0.25, (60, 140), (0.5, 2.5), (8, 12), (10, 18)),
+    ("Freight Truck", 0.20, (100, 300), (3.0, 9.0), (8, 14), (25, 40)),
+    ("Mining Haul Vehicle", 0.15, (30, 90), (10.0, 25.0), (10, 18), (55, 110)),
+    ("Construction Equipment Carrier", 0.10, (20, 60), (5.0, 15.0), (6, 12), (40, 75)),
+    ("Forklift / Warehouse Vehicle", 0.10, (5, 25), (0.5, 3.0), (8, 16), (6, 12)),
 ]
 
 CITIES = [
@@ -56,13 +56,13 @@ def generate_fleet():
     ev_flags[rng.choice(N_VEHICLES, size=N_ALREADY_EV, replace=False)] = True
 
     for i in range(N_VEHICLES):
-        vtype, _, dist_r, payload_r, duty_r = VEHICLE_TYPES[type_choices[i]]
+        vtype, _, dist_r, payload_r, duty_r, fuel_r = VEHICLE_TYPES[type_choices[i]]
         city = CITIES[rng.integers(0, len(CITIES))]
         daily_distance = round(rng.uniform(*dist_r), 1)
         payload = round(rng.uniform(*payload_r), 2)
         duty_hours = round(rng.uniform(*duty_r), 1)
         dwell_time = round(rng.uniform(2, 12), 1)  # hours available at depot
-        fuel_consumption = round(rng.uniform(12, 35), 1)  # L/100km diesel
+        fuel_consumption = round(rng.uniform(*fuel_r), 1)  # L/100km diesel, segment-appropriate
         fuel_cost_per_l = 92.5  # INR, national avg diesel price
         annual_km = round(daily_distance * rng.uniform(300, 340))
         age_years = round(rng.uniform(0.5, 9), 1)
@@ -93,11 +93,15 @@ def generate_oem_catalog():
         {"oem_model": "Tata Ace EV", "segment": "Last-mile Delivery Van", "range_km": 154, "payload_capacity_ton": 0.6, "price_inr_lakh": 9.5, "delivery_lead_time_days": 45, "battery_kwh": 21.3},
         {"oem_model": "Euler HiLoad EV", "segment": "Last-mile Delivery Van", "range_km": 200, "payload_capacity_ton": 1.5, "price_inr_lakh": 12.0, "delivery_lead_time_days": 60, "battery_kwh": 37.3},
         {"oem_model": "Mahindra Treo Zor", "segment": "Intra-plant Tug", "range_km": 80, "payload_capacity_ton": 0.55, "price_inr_lakh": 3.8, "delivery_lead_time_days": 30, "battery_kwh": 7.4},
+        {"oem_model": "Kinetic Safar Industrial", "segment": "Intra-plant Tug", "range_km": 55, "payload_capacity_ton": 0.35, "price_inr_lakh": 2.6, "delivery_lead_time_days": 20, "battery_kwh": 5.0},
         {"oem_model": "Ashok Leyland Circuit", "segment": "Freight Truck", "range_km": 200, "payload_capacity_ton": 9.0, "price_inr_lakh": 45.0, "delivery_lead_time_days": 120, "battery_kwh": 150.0},
         {"oem_model": "Switch EiV 12", "segment": "Freight Truck", "range_km": 180, "payload_capacity_ton": 8.0, "price_inr_lakh": 42.0, "delivery_lead_time_days": 100, "battery_kwh": 140.0},
         {"oem_model": "BYD ETM6 (Industrial)", "segment": "Mining Haul Vehicle", "range_km": 120, "payload_capacity_ton": 20.0, "price_inr_lakh": 85.0, "delivery_lead_time_days": 150, "battery_kwh": 220.0},
+        {"oem_model": "Volvo EC Compact Hauler", "segment": "Mining Haul Vehicle", "range_km": 100, "payload_capacity_ton": 12.0, "price_inr_lakh": 55.0, "delivery_lead_time_days": 120, "battery_kwh": 150.0},
         {"oem_model": "Olectra Construction EV", "segment": "Construction Equipment Carrier", "range_km": 100, "payload_capacity_ton": 12.0, "price_inr_lakh": 60.0, "delivery_lead_time_days": 130, "battery_kwh": 180.0},
+        {"oem_model": "JCB E-TECH Carrier", "segment": "Construction Equipment Carrier", "range_km": 80, "payload_capacity_ton": 8.0, "price_inr_lakh": 38.0, "delivery_lead_time_days": 90, "battery_kwh": 110.0},
         {"oem_model": "EFA Forklift Electric", "segment": "Forklift / Warehouse Vehicle", "range_km": 60, "payload_capacity_ton": 2.5, "price_inr_lakh": 5.2, "delivery_lead_time_days": 25, "battery_kwh": 15.0},
+        {"oem_model": "Godrej E-Forklift Compact", "segment": "Forklift / Warehouse Vehicle", "range_km": 45, "payload_capacity_ton": 1.5, "price_inr_lakh": 3.5, "delivery_lead_time_days": 20, "battery_kwh": 9.0},
     ])
 
 
