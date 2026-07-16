@@ -1,4 +1,5 @@
 import { useState } from "react";
+import LandingPage from "./components/LandingPage";
 import FleetOverview from "./components/FleetOverview";
 import ProcurementPlan from "./components/ProcurementPlan";
 import BatteryHealth from "./components/BatteryHealth";
@@ -18,20 +19,25 @@ const SECTIONS = [
 ];
 
 function App() {
+  const [entered, setEntered] = useState(false);
   const [active, setActive] = useState("fleet");
   const ActiveComponent = SECTIONS.find((s) => s.id === active).component;
+
+  if (!entered) {
+    return <LandingPage onEnter={() => setEntered(true)} />;
+  }
 
   return (
     <div className="flex min-h-screen">
       <aside className="w-64 shrink-0 border-r border-[var(--panel-border)] flex flex-col p-4 gap-1">
-        <div className="mb-6 px-2">
+        <button className="mb-6 px-2 text-left" onClick={() => setEntered(false)}>
           <div className="text-xl font-semibold flex items-center gap-2">
             <span>🔋</span> EV Twin AI
           </div>
           <div className="text-xs text-[var(--text-dim)] mt-1">
             AI Digital Twin Platform for Industrial EV Fleets & Manufacturing Supply Chains
           </div>
-        </div>
+        </button>
         {SECTIONS.map((s) => (
           <button
             key={s.id}
