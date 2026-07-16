@@ -1,15 +1,82 @@
 """
 Procurement Agent: scores diesel fleet vehicles on EV-transition readiness,
 matches each to the best-fit OEM model, and computes ROI/savings.
+
+Designed to run on either the bundled synthetic fleet or a user-uploaded
+fleet CSV (see validate_and_normalize_fleet) -- and on region-specific
+assumptions (electricity price, emission factors, charger power) instead of
+hardcoded constants, since those vary by state and change over time.
 """
 import os
 import pandas as pd
 from backend.config import DATA_DIR
 
-DIESEL_EMISSION_FACTOR_KG_PER_L = 2.68  # kg CO2 per liter diesel (standard combustion factor)
-GRID_EMISSION_FACTOR_KG_PER_KWH = 0.716  # India national grid avg, CEA baseline (approx)
-ELECTRICITY_COST_INR_PER_KWH = 8.0
-CHARGER_KW = 15.0  # assumed depot AC charger power
+DEFAULT_ASSUMPTIONS = {
+    "diesel_emission_factor_kg_per_l": 2.68,   # kg CO2 per liter diesel (standard combustion factor)
+    "grid_emission_factor_kg_per_kwh": 0.716,  # India national grid avg, CEA baseline (approx) -- varies by state
+    "electricity_cost_inr_per_kwh": 8.0,       # varies by state/tariff slab/time-of-use
+    "charger_kw": 15.0,                        # assumed depot AC charger power
+}
+
+# Columns a real fleet CSV must have -- everything else is optional and defaulted.
+REQUIRED_FLEET_COLUMNS = {
+    "vehicle_id", "vehicle_type", "daily_distance_km", "payload_ton",
+    "duty_hours_per_day", "dwell_time_hours", "fuel_consumption_l_per_100km", "annual_km",
+}
+OPTIONAL_FLEET_DEFAULTS = {
+    "fuel_cost_per_liter_inr": 92.5,  # national avg diesel price; override with local pump price
+    "idle_time_pct": 15.0,
+    "depot_city": "Unspecified",
+    "is_electrified": False,
+}
+
+KNOWN_SEGMENTS = [
+    "Intra-plant Tug", "Last-mile Delivery Van", "Freight Truck",
+    "Mining Haul Vehicle", "Construction Equipment Carrier", "Forklift / Warehouse Vehicle",
+]
+
+
+def validate_and_normalize_fleet(df: pd.DataFrame):
+    """Check an uploaded fleet CSV against the required schema, fill defaults
+    for optional columns, and return (clean_df, warnings). Raises ValueError
+    with a clear message if required columns are missing."""
+    missing = REQUIRED_FLEET_COLUMNS - set(df.columns)
+    if missing:
+        raise ValueError(
+            f"Missing required column(s): {', '.join(sorted(missing))}. "
+            f"Required columns: {', '.join(sorted(REQUIRED_FLEET_COLUMNS))}."
+        )
+
+    df = df.copy()
+    warnings = []
+    for col, default in OPTIONAL_FLEET_DEFAULTS.items():
+        if col not in df.columns:
+            df[col] = default
+            warnings.append(f"Column '{col}' not provided -- defaulted to {default}.")
+
+    numeric_cols = [
+        "daily_distance_km", "payload_ton", "duty_hours_per_day", "dwell_time_hours",
+        "fuel_consumption_l_per_100km", "annual_km", "fuel_cost_per_liter_inr", "idle_time_pct",
+    ]
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    bad_rows = df[df[numeric_cols].isna().any(axis=1)]
+    if len(bad_rows):
+        warnings.append(
+            f"{len(bad_rows)} row(s) dropped due to missing/non-numeric values: "
+            f"{', '.join(bad_rows.vehicle_id.astype(str).tolist()[:10])}"
+            + (" ..." if len(bad_rows) > 10 else "")
+        )
+        df = df.drop(bad_rows.index)
+
+    unknown_segments = sorted(set(df.vehicle_type) - set(KNOWN_SEGMENTS))
+    if unknown_segments:
+        warnings.append(
+            f"Vehicle type(s) not in the OEM catalog (no match possible, will be skipped): "
+            f"{', '.join(unknown_segments)}. Known types: {', '.join(KNOWN_SEGMENTS)}."
+        )
+
+    return df.reset_index(drop=True), warnings
 
 
 def _load():
@@ -35,7 +102,7 @@ def _payload_fit_score(payload_ton, ev_capacity_ton):
     return max(0, 100 * ev_capacity_ton / (payload_ton + 1e-6))
 
 
-def _charging_fit_score(dwell_hours, battery_kwh, charger_kw=CHARGER_KW):
+def _charging_fit_score(dwell_hours, battery_kwh, charger_kw):
     charge_time_needed = battery_kwh / charger_kw
     if dwell_hours >= charge_time_needed * 1.2:
         return 100
@@ -49,10 +116,23 @@ def _duty_intensity_bonus(duty_hours, idle_pct):
     return min(100, duty_hours * 4 + (100 - idle_pct) * 0.3)
 
 
-def score_vehicle(vehicle_row, oem_row):
+def _confidence_score(breakdown):
+    """How much to trust this readiness score: high when every dimension
+    agrees the vehicle is a good fit, low when one weak dimension (e.g. poor
+    charging fit) is being masked by strong scores elsewhere -- that's exactly
+    the situation where a procurement decision made on the headline score
+    alone would be a mistake."""
+    values = list(breakdown.values())
+    avg = sum(values) / len(values)
+    weakest = min(values)
+    spread_penalty = (avg - weakest) * 0.6
+    return round(max(30.0, 100.0 - spread_penalty), 1)
+
+
+def score_vehicle(vehicle_row, oem_row, assumptions=DEFAULT_ASSUMPTIONS):
     range_score = _range_fit_score(vehicle_row.daily_distance_km, oem_row.range_km)
     payload_score = _payload_fit_score(vehicle_row.payload_ton, oem_row.payload_capacity_ton)
-    charging_score = _charging_fit_score(vehicle_row.dwell_time_hours, oem_row.battery_kwh)
+    charging_score = _charging_fit_score(vehicle_row.dwell_time_hours, oem_row.battery_kwh, assumptions["charger_kw"])
     duty_score = _duty_intensity_bonus(vehicle_row.duty_hours_per_day, vehicle_row.idle_time_pct)
 
     weighted = (
@@ -61,29 +141,30 @@ def score_vehicle(vehicle_row, oem_row):
         + charging_score * 0.25
         + duty_score * 0.15
     )
-    return round(weighted, 1), {
+    breakdown = {
         "range_fit": round(range_score, 1),
         "payload_fit": round(payload_score, 1),
         "charging_fit": round(charging_score, 1),
         "duty_intensity": round(duty_score, 1),
     }
+    return round(weighted, 1), breakdown, _confidence_score(breakdown)
 
 
-def compute_savings(vehicle_row, oem_row):
+def compute_savings(vehicle_row, oem_row, assumptions=DEFAULT_ASSUMPTIONS):
     annual_km = vehicle_row.annual_km
     diesel_l = annual_km * vehicle_row.fuel_consumption_l_per_100km / 100
     diesel_cost = diesel_l * vehicle_row.fuel_cost_per_liter_inr
 
     kwh_per_km = oem_row.battery_kwh / oem_row.range_km
     annual_kwh = annual_km * kwh_per_km
-    ev_energy_cost = annual_kwh * ELECTRICITY_COST_INR_PER_KWH
+    ev_energy_cost = annual_kwh * assumptions["electricity_cost_inr_per_kwh"]
 
     annual_savings_inr = diesel_cost - ev_energy_cost
     capex_inr = oem_row.price_inr_lakh * 100000
     payback_years = capex_inr / annual_savings_inr if annual_savings_inr > 0 else float("inf")
 
-    co2_diesel_kg = diesel_l * DIESEL_EMISSION_FACTOR_KG_PER_L
-    co2_ev_kg = annual_kwh * GRID_EMISSION_FACTOR_KG_PER_KWH
+    co2_diesel_kg = diesel_l * assumptions["diesel_emission_factor_kg_per_l"]
+    co2_ev_kg = annual_kwh * assumptions["grid_emission_factor_kg_per_kwh"]
     co2_saved_kg = co2_diesel_kg - co2_ev_kg
 
     return {
@@ -95,21 +176,36 @@ def compute_savings(vehicle_row, oem_row):
     }
 
 
-def analyze_fleet():
+def analyze_fleet(fleet_df=None, oem_df=None, assumptions=None, return_meta=False):
     """Score every diesel vehicle against every eligible OEM model in its segment,
-    return best match + readiness score + savings for each vehicle."""
-    fleet, oem = _load()
+    return best match + readiness score + savings for each vehicle.
+
+    fleet_df/oem_df: pass a DataFrame to analyze a user-uploaded fleet instead
+    of the bundled synthetic one (see validate_and_normalize_fleet).
+    assumptions: override any of DEFAULT_ASSUMPTIONS (region-specific pricing/factors).
+    return_meta: if True, returns (df, meta) where meta reports skipped vehicles --
+    callers that already assume a bare DataFrame (existing agents/API routes)
+    are unaffected since this defaults to False.
+    """
+    assumptions = {**DEFAULT_ASSUMPTIONS, **(assumptions or {})}
+    if fleet_df is None:
+        fleet, oem = _load()
+    else:
+        fleet = fleet_df
+        oem = oem_df if oem_df is not None else _load()[1]
     diesel_fleet = fleet[~fleet.is_electrified].copy()
 
     results = []
+    skipped = []
     for _, veh in diesel_fleet.iterrows():
         candidates = oem[oem.segment == veh.vehicle_type]
         if candidates.empty:
+            skipped.append({"vehicle_id": veh.vehicle_id, "reason": f"no OEM catalog entry for vehicle_type '{veh.vehicle_type}'"})
             continue
-        best_score, best_breakdown, best_oem, best_savings, best_rank = -1, None, None, None, None
+        best_score, best_breakdown, best_oem, best_savings, best_confidence, best_rank = -1, None, None, None, None, None
         for _, oem_row in candidates.iterrows():
-            score, breakdown = score_vehicle(veh, oem_row)
-            savings = compute_savings(veh, oem_row)
+            score, breakdown, confidence = score_vehicle(veh, oem_row, assumptions)
+            savings = compute_savings(veh, oem_row, assumptions)
             # operational fit drives the match, but within a 5-point band treat
             # scores as tied and prefer the OEM with the better payback --
             # otherwise a vehicle can get a top readiness score paired with a
@@ -118,7 +214,9 @@ def analyze_fleet():
             payback = savings["payback_years"]
             rank = (round(score / 5), -(payback if payback is not None else 1e9))
             if best_rank is None or rank > best_rank:
-                best_score, best_breakdown, best_oem, best_savings, best_rank = score, breakdown, oem_row, savings, rank
+                best_score, best_breakdown, best_oem, best_savings, best_confidence, best_rank = (
+                    score, breakdown, oem_row, savings, confidence, rank
+                )
 
         results.append({
             "vehicle_id": veh.vehicle_id,
@@ -127,13 +225,19 @@ def analyze_fleet():
             "daily_distance_km": veh.daily_distance_km,
             "payload_ton": veh.payload_ton,
             "transition_readiness_score": best_score,
+            "confidence_score": best_confidence,
             "score_breakdown": best_breakdown,
             "recommended_oem_model": best_oem.oem_model,
             "delivery_lead_time_days": int(best_oem.delivery_lead_time_days),
             **best_savings,
         })
 
-    df = pd.DataFrame(results).sort_values("transition_readiness_score", ascending=False)
+    df = pd.DataFrame(results)
+    if len(df):
+        df = df.sort_values("transition_readiness_score", ascending=False)
+
+    if return_meta:
+        return df, {"skipped_vehicles": skipped, "assumptions_used": assumptions}
     return df
 
 
@@ -160,4 +264,4 @@ def procurement_plan(df=None, phase_size=20):
 if __name__ == "__main__":
     result = analyze_fleet()
     print(result.head(10).to_string())
-    print("\nTop candidate breakdown:", result.iloc[0].score_breakdown)
+    print("\nTop candidate breakdown:", result.iloc[0].score_breakdown, "confidence:", result.iloc[0].confidence_score)

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import LandingPage from "./components/LandingPage";
+import UploadFleet from "./components/UploadFleet";
 import FleetOverview from "./components/FleetOverview";
 import ProcurementPlan from "./components/ProcurementPlan";
 import BatteryHealth from "./components/BatteryHealth";
@@ -9,6 +10,7 @@ import CarbonIntelligence from "./components/CarbonIntelligence";
 import ChatAssistant from "./components/ChatAssistant";
 
 const SECTIONS = [
+  { id: "upload", label: "Upload Your Fleet", icon: "📤", component: UploadFleet },
   { id: "fleet", label: "Fleet Overview", icon: "🚛", component: FleetOverview },
   { id: "procurement", label: "Procurement Plan", icon: "📋", component: ProcurementPlan },
   { id: "health", label: "Battery Health", icon: "🔧", component: BatteryHealth },

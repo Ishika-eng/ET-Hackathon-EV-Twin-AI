@@ -105,6 +105,7 @@ export default function FleetOverview() {
               <th className="py-2 pr-4">City</th>
               <th className="py-2 pr-4">Distance/day</th>
               <th className="py-2 pr-4">Score</th>
+              <th className="py-2 pr-4">Confidence</th>
               <th className="py-2 pr-4">Recommended EV</th>
               <th className="py-2 pr-4">Savings/yr</th>
               <th className="py-2 pr-4">Payback</th>
@@ -118,6 +119,7 @@ export default function FleetOverview() {
                 <td className="py-2 pr-4 text-[var(--text-dim)]">{r.depot_city}</td>
                 <td className="py-2 pr-4">{r.daily_distance_km} km</td>
                 <td className="py-2 pr-4 text-[var(--accent)] font-medium">{r.transition_readiness_score}</td>
+                <td className="py-2 pr-4 text-[var(--text-dim)]">{r.confidence_score}%</td>
                 <td className="py-2 pr-4">{r.recommended_oem_model}</td>
                 <td className="py-2 pr-4">₹{(r.annual_savings_inr / 1e5).toFixed(1)}L</td>
                 <td className="py-2 pr-4">{r.payback_years ? `${r.payback_years} yrs` : "N/A"}</td>

@@ -76,8 +76,13 @@ export default function DigitalTwin() {
           <div className="panel p-4 border-l-4 border-l-[var(--info)]">
             <span className="text-[var(--info)] font-medium">{active} — Diesel Vehicle (Procurement Candidate)</span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <MetricCard label="Readiness Score" value={`${procRow.transition_readiness_score}%`} tone="accent" />
+            <MetricCard
+              label="Confidence"
+              value={`${procRow.confidence_score}%`}
+              tone={procRow.confidence_score < 70 ? "warning" : "default"}
+            />
             <MetricCard label="Recommended EV" value={procRow.recommended_oem_model} />
             <MetricCard label="Payback Period" value={procRow.payback_years ? `${procRow.payback_years} yrs` : "N/A"} />
             <MetricCard label="CO2 Saved/yr" value={`${(procRow.co2_saved_kg_per_year / 1000).toFixed(1)} tons`} />

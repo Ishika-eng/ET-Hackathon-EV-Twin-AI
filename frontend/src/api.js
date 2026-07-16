@@ -6,6 +6,18 @@ export const api = {
   getProcurementFleet: () => client.get("/procurement/fleet").then((r) => r.data),
   getProcurementPlan: (phaseSize = 20) =>
     client.get("/procurement/plan", { params: { phase_size: phaseSize } }).then((r) => r.data),
+  getKnownSegments: () => client.get("/procurement/known-segments").then((r) => r.data),
+  getFleetTemplateUrl: () => "/api/procurement/template",
+  uploadFleet: (file, assumptions = {}) => {
+    const form = new FormData();
+    form.append("file", file);
+    Object.entries(assumptions).forEach(([k, v]) => {
+      if (v !== null && v !== "" && v !== undefined) form.append(k, v);
+    });
+    return client.post("/procurement/upload", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data);
+  },
 
   getHealthFleet: () => client.get("/health/fleet").then((r) => r.data),
   getHealthValidation: () => client.get("/health/validation").then((r) => r.data),
