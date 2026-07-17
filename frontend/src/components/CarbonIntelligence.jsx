@@ -2,7 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import MetricCard from "./MetricCard";
-import { Loading, ErrorBanner } from "./Loading";
+import { PageSkeleton, ErrorBanner } from "./Loading";
 
 const TYPE_COLORS = {
   "Intra-plant Tug": "#22d3a5",
@@ -17,7 +17,7 @@ export default function CarbonIntelligence() {
   const summary = useFetch(() => api.getCarbonSummary(), []);
   const topImpact = useFetch(() => api.getTopImpact(10), []);
 
-  if (summary.loading || topImpact.loading) return <Loading label="Computing carbon impact..." />;
+  if (summary.loading || topImpact.loading) return <PageSkeleton metricCount={3} />;
   if (summary.error) return <ErrorBanner message={summary.error} />;
   if (topImpact.error) return <ErrorBanner message={topImpact.error} />;
 

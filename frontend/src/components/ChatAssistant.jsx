@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
+import { Send, Bot, Loader2 } from "lucide-react";
 import { api } from "../api";
 import { ErrorBanner } from "./Loading";
+import Button from "./Button";
 
 export default function ChatAssistant() {
   const [messages, setMessages] = useState([]);
@@ -42,13 +44,17 @@ export default function ChatAssistant() {
       <div className="flex-1 overflow-y-auto scrollbar-thin p-4 flex flex-col gap-4">
         {messages.length === 0 && (
           <div className="text-[var(--text-dim)] text-sm flex flex-col gap-2">
-            <p>Ask the Orchestrator Agent a cross-cutting question — it will call the Procurement, Fleet Health, and Supply Chain agents as needed.</p>
+            <div className="flex items-center gap-2 text-[var(--text)] font-medium mb-1">
+              <Bot size={16} strokeWidth={2.25} className="text-[var(--accent-blue)]" />
+              Orchestrator Agent
+            </div>
+            <p>Ask a cross-cutting question — it will call the Procurement, Fleet Health, and Supply Chain agents as needed.</p>
             <div className="flex flex-col gap-2 mt-2">
               {suggestions.map((s) => (
                 <button
                   key={s}
                   onClick={() => setInput(s)}
-                  className="text-left text-sm px-3 py-2 rounded-md border border-[var(--panel-border)] hover:border-[var(--accent-blue)] transition-colors"
+                  className="text-left text-sm px-3 py-2 rounded-lg border border-[var(--panel-border)] hover:border-[var(--accent-blue)] transition-colors"
                 >
                   {s}
                 </button>
@@ -57,7 +63,12 @@ export default function ChatAssistant() {
           </div>
         )}
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+          <div key={i} className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+            {m.role === "assistant" && (
+              <span className="shrink-0 w-7 h-7 rounded-full bg-[var(--accent-blue-dim)] flex items-center justify-center mt-0.5">
+                <Bot size={14} strokeWidth={2.25} className="text-[var(--accent-blue)]" />
+              </span>
+            )}
             <div
               className={`max-w-[75%] rounded-xl px-4 py-2 text-sm whitespace-pre-wrap ${
                 m.role === "user" ? "bg-[var(--accent-blue-dim)] text-[var(--text)]" : "bg-[var(--bg)] border border-[var(--panel-border)]"
@@ -67,7 +78,14 @@ export default function ChatAssistant() {
             </div>
           </div>
         ))}
-        {sending && <div className="text-[var(--text-dim)] text-sm">Thinking...</div>}
+        {sending && (
+          <div className="flex items-center gap-2 text-[var(--text-dim)] text-sm">
+            <span className="shrink-0 w-7 h-7 rounded-full bg-[var(--accent-blue-dim)] flex items-center justify-center">
+              <Loader2 size={14} className="animate-spin text-[var(--accent-blue)]" />
+            </span>
+            Thinking...
+          </div>
+        )}
         {error && <ErrorBanner message={error} />}
         <div ref={bottomRef} />
       </div>
@@ -77,15 +95,11 @@ export default function ChatAssistant() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
           placeholder="e.g. Why is vehicle V017 degrading faster than average?"
-          className="flex-1 bg-[var(--bg)] border border-[var(--panel-border)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent-blue)]"
+          className="flex-1 bg-[var(--bg)] border border-[var(--panel-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent-blue)]"
         />
-        <button
-          onClick={send}
-          disabled={sending}
-          className="bg-[var(--accent-blue)] text-[var(--bg)] font-medium px-4 py-2 rounded-md text-sm disabled:opacity-50"
-        >
+        <Button onClick={send} disabled={sending} icon={Send}>
           Send
-        </button>
+        </Button>
       </div>
     </div>
   );

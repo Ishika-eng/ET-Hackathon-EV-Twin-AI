@@ -5,7 +5,7 @@ import {
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import MetricCard from "./MetricCard";
-import { Loading, ErrorBanner } from "./Loading";
+import { PageSkeleton, ErrorBanner } from "./Loading";
 
 const TIER_COLORS = { Critical: "#b71c1c", High: "#e64a19", Medium: "#f9a825", Low: "#388e3c" };
 
@@ -19,7 +19,7 @@ export default function SupplyChainRisk() {
     return suppliers.data.filter((s) => s.risk_tier === "Critical" || s.risk_tier === "High").length;
   }, [suppliers.data]);
 
-  if (suppliers.loading || concentration.loading || leadTime.loading) return <Loading label="Analyzing suppliers..." />;
+  if (suppliers.loading || concentration.loading || leadTime.loading) return <PageSkeleton metricCount={3} />;
   if (suppliers.error) return <ErrorBanner message={suppliers.error} />;
   if (concentration.error) return <ErrorBanner message={concentration.error} />;
   if (leadTime.error) return <ErrorBanner message={leadTime.error} />;

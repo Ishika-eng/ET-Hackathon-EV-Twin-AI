@@ -3,7 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import MetricCard from "./MetricCard";
-import { Loading, ErrorBanner } from "./Loading";
+import { PageSkeleton, ErrorBanner } from "./Loading";
 
 export default function BatteryHealth() {
   const health = useFetch(() => api.getHealthFleet(), []);
@@ -14,7 +14,7 @@ export default function BatteryHealth() {
     return health.data.filter((r) => r.estimated_rul_days != null && r.estimated_rul_days < 180).length;
   }, [health.data]);
 
-  if (health.loading || validation.loading) return <Loading label="Analyzing telemetry..." />;
+  if (health.loading || validation.loading) return <PageSkeleton metricCount={3} />;
   if (health.error) return <ErrorBanner message={health.error} />;
   if (validation.error) return <ErrorBanner message={validation.error} />;
 

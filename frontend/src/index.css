@@ -51,10 +51,27 @@ table, .tabular-nums {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -12px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes pulse-skeleton {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-skeleton {
+  animation: pulse-skeleton 1.6s ease-in-out infinite;
 }
 
 a, button {
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
 }
 
 button:not(:disabled), a {
@@ -96,4 +113,79 @@ input, select, textarea {
 
 input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
   border-color: var(--accent-blue) !important;
+}
+
+/* ---- Landing page ambience ---- */
+
+.landing-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--panel-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--panel-border) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  opacity: 0.5;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.35;
+}
+.blob-blue {
+  width: 480px;
+  height: 480px;
+  background: var(--accent-blue);
+  top: -120px;
+  left: -80px;
+  animation: drift-a 16s ease-in-out infinite;
+}
+.blob-green {
+  width: 420px;
+  height: 420px;
+  background: var(--accent);
+  top: -60px;
+  right: -100px;
+  animation: drift-b 20s ease-in-out infinite;
+}
+
+@keyframes drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, 60px) scale(1.1); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-50px, 40px) scale(1.05); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(58, 163, 255, 0.45); }
+  70% { box-shadow: 0 0 0 18px rgba(58, 163, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(58, 163, 255, 0); }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.animate-bar-grow {
+  transform-origin: bottom;
+  animation: bar-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

@@ -6,7 +6,7 @@ import {
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import MetricCard from "./MetricCard";
-import { Loading, ErrorBanner } from "./Loading";
+import { PageSkeleton, ErrorBanner } from "./Loading";
 
 const COLUMNS = [
   { key: "vehicle_id", label: "Vehicle" },
@@ -86,7 +86,7 @@ export default function FleetOverview() {
     setSort((prev) => (prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" }));
   };
 
-  if (loading) return <Loading label="Scoring fleet..." />;
+  if (loading) return <PageSkeleton metricCount={4} />;
   if (error) return <ErrorBanner message={error} />;
 
   const scoreDist = bucketScores(data);

@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Download, PlayCircle, AlertTriangle } from "lucide-react";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import MetricCard from "./MetricCard";
+import Button from "./Button";
 import { ErrorBanner } from "./Loading";
 
 export default function UploadFleet() {
@@ -45,23 +47,19 @@ export default function UploadFleet() {
           <a
             href={api.getFleetTemplateUrl()}
             download="fleet_template.csv"
-            className="text-sm px-3 py-2 rounded-md border border-[var(--panel-border)] hover:border-[var(--accent-blue)] transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-[var(--panel-border)] hover:border-[var(--accent-blue)] transition-colors"
           >
-            ⬇ Download CSV template
+            <Download size={14} strokeWidth={2.25} /> Download CSV template
           </a>
           <input
             type="file"
             accept=".csv"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="text-sm text-[var(--text-dim)] file:mr-3 file:py-2 file:px-3 file:rounded-md file:border file:border-[var(--panel-border)] file:bg-[var(--bg)] file:text-[var(--text)] file:text-sm"
+            className="text-sm text-[var(--text-dim)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border file:border-[var(--panel-border)] file:bg-[var(--bg)] file:text-[var(--text)] file:text-sm"
           />
-          <button
-            onClick={analyze}
-            disabled={!file || loading}
-            className="bg-[var(--accent-blue)] text-[var(--bg)] font-medium px-4 py-2 rounded-md text-sm disabled:opacity-50"
-          >
+          <Button onClick={analyze} disabled={!file || loading} icon={PlayCircle}>
             {loading ? "Analyzing..." : "Analyze Fleet"}
-          </button>
+          </Button>
         </div>
 
         {!segments.loading && !segments.error && (
@@ -118,7 +116,9 @@ export default function UploadFleet() {
 
           {result.warnings.length > 0 && (
             <div className="panel p-4 border-[var(--warning)]">
-              <div className="text-sm font-medium text-[var(--warning)] mb-2">Warnings</div>
+              <div className="text-sm font-medium text-[var(--warning)] mb-2 flex items-center gap-1.5">
+                <AlertTriangle size={14} strokeWidth={2.25} /> Warnings
+              </div>
               <ul className="text-sm text-[var(--text-dim)] list-disc list-inside space-y-1">
                 {result.warnings.map((w, i) => <li key={i}>{w}</li>)}
               </ul>
