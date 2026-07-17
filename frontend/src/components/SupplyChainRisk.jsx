@@ -40,11 +40,11 @@ export default function SupplyChainRisk() {
         <h3 className="text-sm font-medium text-[var(--text-dim)] mb-3">Supplier Risk Landscape</h3>
         <ResponsiveContainer width="100%" height={340}>
           <ScatterChart>
-            <CartesianGrid strokeDasharray="3 3" stroke="#223052" />
-            <XAxis type="number" dataKey="concentration_pct" name="Concentration %" stroke="#8b98b8" fontSize={12} />
-            <YAxis type="number" dataKey="risk_score" name="Risk Score" stroke="#8b98b8" fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--panel-border)" />
+            <XAxis type="number" dataKey="concentration_pct" name="Concentration %" stroke="var(--text-dim)" fontSize={12} />
+            <YAxis type="number" dataKey="risk_score" name="Risk Score" stroke="var(--text-dim)" fontSize={12} />
             <ZAxis type="number" dataKey="volume_supplied_tons" range={[40, 300]} name="Volume (tons)" />
-            <Tooltip cursor={{ strokeDasharray: "3 3" }} contentStyle={{ background: "#121a2e", border: "1px solid #223052" }} />
+            <Tooltip cursor={{ strokeDasharray: "3 3" }} contentStyle={{ background: "var(--panel)", border: "1px solid var(--panel-border)" }} />
             <Legend />
             {Object.keys(TIER_COLORS).map((tier) => (
               <Scatter

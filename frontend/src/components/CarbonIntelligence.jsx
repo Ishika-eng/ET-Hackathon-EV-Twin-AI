@@ -54,10 +54,10 @@ export default function CarbonIntelligence() {
         <h3 className="text-sm font-medium text-[var(--text-dim)] mb-3">Highest-Impact Next Electrification Priorities</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={topImpact.data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#223052" />
-            <XAxis dataKey="vehicle_id" stroke="#8b98b8" fontSize={12} />
-            <YAxis stroke="#8b98b8" fontSize={12} />
-            <Tooltip contentStyle={{ background: "#121a2e", border: "1px solid #223052" }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--panel-border)" />
+            <XAxis dataKey="vehicle_id" stroke="var(--text-dim)" fontSize={12} />
+            <YAxis stroke="var(--text-dim)" fontSize={12} />
+            <Tooltip contentStyle={{ background: "var(--panel)", border: "1px solid var(--panel-border)" }} />
             <Bar dataKey="co2_saved_kg_per_year" fill="#22d3a5" radius={[4, 4, 0, 0]}>
               {topImpact.data.map((r) => (
                 <Cell key={r.vehicle_id} fill={TYPE_COLORS[r.vehicle_type] || "#22d3a5"} />

@@ -38,7 +38,7 @@ export default function ChatAssistant() {
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-180px)] panel">
+    <div className="flex flex-col h-full min-h-[500px] panel">
       <div className="flex-1 overflow-y-auto scrollbar-thin p-4 flex flex-col gap-4">
         {messages.length === 0 && (
           <div className="text-[var(--text-dim)] text-sm flex flex-col gap-2">

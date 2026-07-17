@@ -3,9 +3,10 @@
 :root {
   --bg: #0b1120;
   --panel: #121a2e;
+  --panel-hover: #16203a;
   --panel-border: #223052;
   --text: #e6ebf5;
-  --text-dim: #8b98b8;
+  --text-dim: #9aa6c4;
   --accent: #22d3a5;
   --accent-dim: #14563f;
   --danger: #f6584f;
@@ -25,13 +26,48 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* tabular figures keep numeric columns aligned -- makes dense tables much easier to scan */
+table, .tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 .panel {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
+}
+
+a, button {
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+button:not(:disabled), a {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+table th {
+  font-weight: 500;
+}
+
+tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+tbody tr:hover {
+  background: var(--panel-hover);
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -41,4 +77,15 @@ body {
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: var(--panel-border);
   border-radius: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
+  border-color: var(--accent) !important;
 }
