@@ -83,6 +83,31 @@ source venv/bin/activate
 streamlit run streamlit_app/app.py
 ```
 
+## Deploy
+
+Backend on [Render](https://render.com), frontend on [Vercel](https://vercel.com) — both have free
+tiers and deploy straight from this GitHub repo.
+
+**1. Backend (Render)**
+- New → Blueprint → connect this repo. Render reads [`render.yaml`](render.yaml) automatically and
+  configures the service (Python 3.13, `pip install -r requirements.txt`,
+  `uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT`).
+- When prompted, set the `GROQ_API_KEY` environment variable (get one free at
+  [console.groq.com/keys](https://console.groq.com/keys) — it's marked `sync: false` in the
+  blueprint so it's never committed to the repo).
+- The synthetic datasets are gitignored; the backend generates them automatically on first boot
+  (see `ensure_data_exists()` in `backend/api/main.py`), so no extra build step is needed.
+- Note the deployed URL, e.g. `https://ev-twin-ai-api.onrender.com`. Render's free tier spins down
+  after inactivity — the first request after idling can take ~30-50s to cold-start.
+
+**2. Frontend (Vercel)**
+- New Project → import this repo → set **Root Directory** to `frontend`. Vercel auto-detects the
+  Vite build (`npm run build` → `dist/`).
+- Add environment variable `VITE_API_URL` = your Render backend URL from step 1 (no trailing
+  slash, e.g. `https://ev-twin-ai-api.onrender.com`).
+- Deploy. The frontend calls `${VITE_API_URL}/api/...` in production and falls back to the local
+  Vite dev proxy (`/api`) automatically when `VITE_API_URL` is unset, so local dev is unaffected.
+
 ## Project structure
 
 ```

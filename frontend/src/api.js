@@ -1,13 +1,18 @@
 import axios from "axios";
 
-const client = axios.create({ baseURL: "/api" });
+// In dev, Vite proxies "/api" to the local backend (see vite.config.js).
+// In production there's no such proxy, so VITE_API_URL must point at the
+// deployed backend's absolute URL (set in the hosting platform's env vars).
+const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "/api";
+
+const client = axios.create({ baseURL: API_BASE });
 
 export const api = {
   getProcurementFleet: () => client.get("/procurement/fleet").then((r) => r.data),
   getProcurementPlan: (phaseSize = 20) =>
     client.get("/procurement/plan", { params: { phase_size: phaseSize } }).then((r) => r.data),
   getKnownSegments: () => client.get("/procurement/known-segments").then((r) => r.data),
-  getFleetTemplateUrl: () => "/api/procurement/template",
+  getFleetTemplateUrl: () => `${API_BASE}/procurement/template`,
   uploadFleet: (file, assumptions = {}) => {
     const form = new FormData();
     form.append("file", file);

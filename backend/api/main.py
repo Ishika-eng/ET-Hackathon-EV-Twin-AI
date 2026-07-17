@@ -1,6 +1,7 @@
 """FastAPI backend exposing the 3 agents + orchestrator chat as a REST API."""
 import io
 import json
+import os
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
@@ -8,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 
+from backend.config import DATA_DIR
 from backend.agents import procurement_agent, fleet_health_agent, supply_chain_agent, carbon_intelligence, orchestrator
 
 app = FastAPI(title="EV Twin AI API")
@@ -18,6 +20,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def ensure_data_exists():
+    """The synthetic datasets are gitignored (regenerable, not source of
+    truth) -- generate them on first boot if a fresh deploy doesn't have
+    them yet, so the platform doesn't depend on a separate build step."""
+    if not os.path.exists(os.path.join(DATA_DIR, "fleet_vehicles.csv")):
+        from backend.data.generate_data import main as generate_data
+        generate_data()
 
 
 def df_records(df):
