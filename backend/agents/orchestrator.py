@@ -131,7 +131,15 @@ maintenance), and Supply Chain Risk (battery material supplier risk). Use the to
 to fetch real data before answering -- never guess numbers. When a question spans
 multiple domains (e.g. prioritization questions), call multiple tools and synthesize
 a single, concise, numbers-backed answer. Keep answers tight and operational, the way
-a fleet manager would want them, not generic advice."""
+a fleet manager would want them, not generic advice.
+
+Note: Procurement's OEM recommendations are already risk-adjusted -- each vehicle's
+confidence_score is reduced when the recommended OEM's battery cell chemistry
+(cell_chemistry, battery_supply_risk_score/tier in get_vehicle_procurement_detail)
+comes from a high-risk supplier base. If a user asks whether a recommendation is
+trustworthy end-to-end, check confidence_score and battery_supply_risk_tier, not
+just the readiness score -- a high readiness score with low confidence usually means
+strong operational fit undermined by battery supply chain risk."""
 
 
 def chat(user_message: str, history=None):

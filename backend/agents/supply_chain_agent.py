@@ -79,6 +79,32 @@ def material_concentration_summary(scored_df=None):
     return pd.DataFrame(summary).sort_values("avg_risk_score", ascending=False)
 
 
+def material_risk_lookup():
+    """{material: avg_risk_score} -- used by the Procurement Agent to make
+    OEM recommendations risk-aware instead of siloed from supply chain data.
+    This is the coupling that makes 'two interconnected angles, one
+    platform' literal rather than just two dashboards sharing a chat box."""
+    scored = analyze_supply_chain()
+    return scored.groupby("material").risk_score.mean().round(1).to_dict()
+
+
+def material_risk_tier(score):
+    """Tiers for material-level average risk. Averaging across a material's
+    suppliers regresses toward the mean (our 6 materials cluster ~34-52),
+    much narrower than individual supplier scores (~15-70) -- reusing
+    risk_tier()'s supplier-calibrated thresholds here would put every
+    material in "High", which is exactly the flat-signal bug already fixed
+    once for risk_tier() itself. Calibrated separately against the actual
+    material-level range."""
+    if score >= 50:
+        return "Critical"
+    if score >= 44:
+        return "High"
+    if score >= 38:
+        return "Medium"
+    return "Low"
+
+
 def detection_lead_time_report():
     """Validates the 'supply chain risk detection lead time' eval criterion:
     how many days earlier would risk-score-based monitoring have flagged each

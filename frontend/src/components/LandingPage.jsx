@@ -8,8 +8,8 @@ const STATS = [
 const FEATURES = [
   {
     icon: "📋",
-    title: "Procurement Intelligence",
-    desc: "Scores every diesel vehicle's EV-transition readiness, matches it to the best-fit OEM model, and computes ROI, payback, and CO2 savings.",
+    title: "Risk-Adjusted Procurement Intelligence",
+    desc: "Scores every diesel vehicle's EV-transition readiness and matches it to the best-fit OEM model — with a confidence score that drops when that model's battery cells trace back to a high-risk supplier. Procurement and Supply Chain aren't separate tabs here; one decision reflects both.",
   },
   {
     icon: "🔧",
@@ -97,6 +97,17 @@ export default function LandingPage({ onEnter }) {
               </p>
             </div>
           </div>
+        </div>
+
+        <div className="w-full max-w-3xl mb-20 panel p-6 border-l-4 border-l-[var(--accent)] text-left">
+          <div className="text-xs uppercase tracking-wide text-[var(--accent)] mb-2">What makes this different</div>
+          <p className="text-sm text-[var(--text-dim)]">
+            Most fleet tools treat procurement and supply chain as separate dashboards. Here, a
+            vehicle's EV recommendation is <span className="text-[var(--text)]">directly informed</span> by
+            the battery supply chain risk of that OEM's cells — if the recommended model's cell
+            supplier is high-risk, the confidence score reflects it automatically, not on a
+            different tab you'd have to remember to check.
+          </p>
         </div>
 
         <div className="w-full max-w-5xl mb-20">

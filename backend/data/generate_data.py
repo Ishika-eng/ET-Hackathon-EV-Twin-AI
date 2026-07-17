@@ -89,19 +89,24 @@ def generate_fleet():
 
 
 def generate_oem_catalog():
+    # cell_chemistry links each model to a supply_chain_agent material so the
+    # Procurement Agent can price in that model's battery supply chain risk --
+    # LFP (lithium iron phosphate, no cobalt) is the common budget/mass-market
+    # choice; NMC (nickel manganese cobalt) trades higher supply risk for
+    # better energy density, typically used where range/payload is tight.
     return pd.DataFrame([
-        {"oem_model": "Tata Ace EV", "segment": "Last-mile Delivery Van", "range_km": 154, "payload_capacity_ton": 0.6, "price_inr_lakh": 9.5, "delivery_lead_time_days": 45, "battery_kwh": 21.3},
-        {"oem_model": "Euler HiLoad EV", "segment": "Last-mile Delivery Van", "range_km": 200, "payload_capacity_ton": 1.5, "price_inr_lakh": 12.0, "delivery_lead_time_days": 60, "battery_kwh": 37.3},
-        {"oem_model": "Mahindra Treo Zor", "segment": "Intra-plant Tug", "range_km": 80, "payload_capacity_ton": 0.55, "price_inr_lakh": 3.8, "delivery_lead_time_days": 30, "battery_kwh": 7.4},
-        {"oem_model": "Kinetic Safar Industrial", "segment": "Intra-plant Tug", "range_km": 55, "payload_capacity_ton": 0.35, "price_inr_lakh": 2.6, "delivery_lead_time_days": 20, "battery_kwh": 5.0},
-        {"oem_model": "Ashok Leyland Circuit", "segment": "Freight Truck", "range_km": 200, "payload_capacity_ton": 9.0, "price_inr_lakh": 45.0, "delivery_lead_time_days": 120, "battery_kwh": 150.0},
-        {"oem_model": "Switch EiV 12", "segment": "Freight Truck", "range_km": 180, "payload_capacity_ton": 8.0, "price_inr_lakh": 42.0, "delivery_lead_time_days": 100, "battery_kwh": 140.0},
-        {"oem_model": "BYD ETM6 (Industrial)", "segment": "Mining Haul Vehicle", "range_km": 120, "payload_capacity_ton": 20.0, "price_inr_lakh": 85.0, "delivery_lead_time_days": 150, "battery_kwh": 220.0},
-        {"oem_model": "Volvo EC Compact Hauler", "segment": "Mining Haul Vehicle", "range_km": 100, "payload_capacity_ton": 12.0, "price_inr_lakh": 55.0, "delivery_lead_time_days": 120, "battery_kwh": 150.0},
-        {"oem_model": "Olectra Construction EV", "segment": "Construction Equipment Carrier", "range_km": 100, "payload_capacity_ton": 12.0, "price_inr_lakh": 60.0, "delivery_lead_time_days": 130, "battery_kwh": 180.0},
-        {"oem_model": "JCB E-TECH Carrier", "segment": "Construction Equipment Carrier", "range_km": 80, "payload_capacity_ton": 8.0, "price_inr_lakh": 38.0, "delivery_lead_time_days": 90, "battery_kwh": 110.0},
-        {"oem_model": "EFA Forklift Electric", "segment": "Forklift / Warehouse Vehicle", "range_km": 60, "payload_capacity_ton": 2.5, "price_inr_lakh": 5.2, "delivery_lead_time_days": 25, "battery_kwh": 15.0},
-        {"oem_model": "Godrej E-Forklift Compact", "segment": "Forklift / Warehouse Vehicle", "range_km": 45, "payload_capacity_ton": 1.5, "price_inr_lakh": 3.5, "delivery_lead_time_days": 20, "battery_kwh": 9.0},
+        {"oem_model": "Tata Ace EV", "segment": "Last-mile Delivery Van", "range_km": 154, "payload_capacity_ton": 0.6, "price_inr_lakh": 9.5, "delivery_lead_time_days": 45, "battery_kwh": 21.3, "cell_chemistry": "LFP Cells"},
+        {"oem_model": "Euler HiLoad EV", "segment": "Last-mile Delivery Van", "range_km": 200, "payload_capacity_ton": 1.5, "price_inr_lakh": 12.0, "delivery_lead_time_days": 60, "battery_kwh": 37.3, "cell_chemistry": "LFP Cells"},
+        {"oem_model": "Mahindra Treo Zor", "segment": "Intra-plant Tug", "range_km": 80, "payload_capacity_ton": 0.55, "price_inr_lakh": 3.8, "delivery_lead_time_days": 30, "battery_kwh": 7.4, "cell_chemistry": "LFP Cells"},
+        {"oem_model": "Kinetic Safar Industrial", "segment": "Intra-plant Tug", "range_km": 55, "payload_capacity_ton": 0.35, "price_inr_lakh": 2.6, "delivery_lead_time_days": 20, "battery_kwh": 5.0, "cell_chemistry": "LFP Cells"},
+        {"oem_model": "Ashok Leyland Circuit", "segment": "Freight Truck", "range_km": 200, "payload_capacity_ton": 9.0, "price_inr_lakh": 45.0, "delivery_lead_time_days": 120, "battery_kwh": 150.0, "cell_chemistry": "NMC Cells"},
+        {"oem_model": "Switch EiV 12", "segment": "Freight Truck", "range_km": 180, "payload_capacity_ton": 8.0, "price_inr_lakh": 42.0, "delivery_lead_time_days": 100, "battery_kwh": 140.0, "cell_chemistry": "NMC Cells"},
+        {"oem_model": "BYD ETM6 (Industrial)", "segment": "Mining Haul Vehicle", "range_km": 120, "payload_capacity_ton": 20.0, "price_inr_lakh": 85.0, "delivery_lead_time_days": 150, "battery_kwh": 220.0, "cell_chemistry": "LFP Cells"},
+        {"oem_model": "Volvo EC Compact Hauler", "segment": "Mining Haul Vehicle", "range_km": 100, "payload_capacity_ton": 12.0, "price_inr_lakh": 55.0, "delivery_lead_time_days": 120, "battery_kwh": 150.0, "cell_chemistry": "NMC Cells"},
+        {"oem_model": "Olectra Construction EV", "segment": "Construction Equipment Carrier", "range_km": 100, "payload_capacity_ton": 12.0, "price_inr_lakh": 60.0, "delivery_lead_time_days": 130, "battery_kwh": 180.0, "cell_chemistry": "NMC Cells"},
+        {"oem_model": "JCB E-TECH Carrier", "segment": "Construction Equipment Carrier", "range_km": 80, "payload_capacity_ton": 8.0, "price_inr_lakh": 38.0, "delivery_lead_time_days": 90, "battery_kwh": 110.0, "cell_chemistry": "LFP Cells"},
+        {"oem_model": "EFA Forklift Electric", "segment": "Forklift / Warehouse Vehicle", "range_km": 60, "payload_capacity_ton": 2.5, "price_inr_lakh": 5.2, "delivery_lead_time_days": 25, "battery_kwh": 15.0, "cell_chemistry": "LFP Cells"},
+        {"oem_model": "Godrej E-Forklift Compact", "segment": "Forklift / Warehouse Vehicle", "range_km": 45, "payload_capacity_ton": 1.5, "price_inr_lakh": 3.5, "delivery_lead_time_days": 20, "battery_kwh": 9.0, "cell_chemistry": "LFP Cells"},
     ])
 
 

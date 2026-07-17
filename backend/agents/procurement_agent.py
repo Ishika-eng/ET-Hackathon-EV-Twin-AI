@@ -10,6 +10,7 @@ hardcoded constants, since those vary by state and change over time.
 import os
 import pandas as pd
 from backend.config import DATA_DIR
+from backend.agents.supply_chain_agent import material_risk_lookup, material_risk_tier as supply_risk_tier
 
 DEFAULT_ASSUMPTIONS = {
     "diesel_emission_factor_kg_per_l": 2.68,   # kg CO2 per liter diesel (standard combustion factor)
@@ -129,6 +130,17 @@ def _confidence_score(breakdown):
     return round(max(30.0, 100.0 - spread_penalty), 1)
 
 
+def _supply_risk_adjusted_confidence(operational_confidence, battery_supply_risk_score):
+    """Couples the Procurement Agent to the Supply Chain Agent: a vehicle
+    matched to an OEM whose battery cells come from a high-risk supplier
+    should be trusted less, even if the operational fit (range/payload/
+    charging) is excellent. Capped at 20 points so a merely elevated risk
+    doesn't drown out an otherwise strong match -- this is a caution signal,
+    not a veto."""
+    penalty = (battery_supply_risk_score / 100) * 20
+    return round(max(20.0, operational_confidence - penalty), 1)
+
+
 def score_vehicle(vehicle_row, oem_row, assumptions=DEFAULT_ASSUMPTIONS):
     range_score = _range_fit_score(vehicle_row.daily_distance_km, oem_row.range_km)
     payload_score = _payload_fit_score(vehicle_row.payload_ton, oem_row.payload_capacity_ton)
@@ -194,6 +206,7 @@ def analyze_fleet(fleet_df=None, oem_df=None, assumptions=None, return_meta=Fals
         fleet = fleet_df
         oem = oem_df if oem_df is not None else _load()[1]
     diesel_fleet = fleet[~fleet.is_electrified].copy()
+    battery_risk_by_material = material_risk_lookup()  # from Supply Chain Agent
 
     results = []
     skipped = []
@@ -202,20 +215,21 @@ def analyze_fleet(fleet_df=None, oem_df=None, assumptions=None, return_meta=Fals
         if candidates.empty:
             skipped.append({"vehicle_id": veh.vehicle_id, "reason": f"no OEM catalog entry for vehicle_type '{veh.vehicle_type}'"})
             continue
-        best_score, best_breakdown, best_oem, best_savings, best_confidence, best_rank = -1, None, None, None, None, None
+        best_score, best_breakdown, best_oem, best_savings, best_confidence, best_supply_risk, best_rank = -1, None, None, None, None, None, None
         for _, oem_row in candidates.iterrows():
-            score, breakdown, confidence = score_vehicle(veh, oem_row, assumptions)
+            score, breakdown, operational_confidence = score_vehicle(veh, oem_row, assumptions)
             savings = compute_savings(veh, oem_row, assumptions)
-            # operational fit drives the match, but within a 5-point band treat
-            # scores as tied and prefer the OEM with the better payback --
-            # otherwise a vehicle can get a top readiness score paired with a
-            # decades-long payback, which reads as broken even though each
-            # number is individually correct
+            battery_supply_risk = battery_risk_by_material.get(oem_row.get("cell_chemistry"), 0.0)
+            confidence = _supply_risk_adjusted_confidence(operational_confidence, battery_supply_risk)
+            # operational fit drives the match; within a 5-point score band
+            # treat candidates as tied and prefer better payback, then lower
+            # battery supply chain risk -- so a vehicle recommendation isn't
+            # just operationally sound, it's sound end-to-end
             payback = savings["payback_years"]
-            rank = (round(score / 5), -(payback if payback is not None else 1e9))
+            rank = (round(score / 5), -(payback if payback is not None else 1e9), -battery_supply_risk)
             if best_rank is None or rank > best_rank:
-                best_score, best_breakdown, best_oem, best_savings, best_confidence, best_rank = (
-                    score, breakdown, oem_row, savings, confidence, rank
+                best_score, best_breakdown, best_oem, best_savings, best_confidence, best_supply_risk, best_rank = (
+                    score, breakdown, oem_row, savings, confidence, battery_supply_risk, rank
                 )
 
         results.append({
@@ -228,6 +242,9 @@ def analyze_fleet(fleet_df=None, oem_df=None, assumptions=None, return_meta=Fals
             "confidence_score": best_confidence,
             "score_breakdown": best_breakdown,
             "recommended_oem_model": best_oem.oem_model,
+            "cell_chemistry": best_oem.get("cell_chemistry"),
+            "battery_supply_risk_score": best_supply_risk,
+            "battery_supply_risk_tier": supply_risk_tier(best_supply_risk) if best_oem.get("cell_chemistry") in battery_risk_by_material else "Unknown",
             "delivery_lead_time_days": int(best_oem.delivery_lead_time_days),
             **best_savings,
         })

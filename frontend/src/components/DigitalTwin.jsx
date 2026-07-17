@@ -98,6 +98,30 @@ export default function DigitalTwin() {
               ))}
             </div>
           </div>
+          <div className="panel p-4">
+            <h3 className="text-sm font-medium text-[var(--text-dim)] mb-2">
+              Battery supply chain risk <span className="text-xs font-normal">(feeds into confidence above)</span>
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+              <div className="panel p-2">
+                <div className="text-xs text-[var(--text-dim)]">Cell chemistry</div>
+                <div className="font-medium">{procRow.cell_chemistry || "Unknown"}</div>
+              </div>
+              <div className="panel p-2">
+                <div className="text-xs text-[var(--text-dim)]">Supplier risk score</div>
+                <div className="font-medium">{procRow.battery_supply_risk_score ?? "N/A"}</div>
+              </div>
+              <div className="panel p-2">
+                <div className="text-xs text-[var(--text-dim)]">Risk tier</div>
+                <div className={`font-medium ${
+                  procRow.battery_supply_risk_tier === "Critical" ? "text-[var(--danger)]" :
+                  procRow.battery_supply_risk_tier === "High" ? "text-[var(--warning)]" : "text-[var(--accent)]"
+                }`}>
+                  {procRow.battery_supply_risk_tier}
+                </div>
+              </div>
+            </div>
+          </div>
         </>
       ) : (
         <div className="text-[var(--text-dim)]">No data for this vehicle.</div>
