@@ -62,7 +62,7 @@ export default function LandingPage({ onEnter }) {
         <div className="flex gap-4 mb-16">
           <button
             onClick={onEnter}
-            className="bg-[var(--accent)] text-[var(--bg)] font-medium px-6 py-3 rounded-lg text-sm hover:opacity-90 transition-opacity"
+            className="bg-[var(--accent-blue)] text-[var(--bg)] font-medium px-6 py-3 rounded-lg text-sm hover:opacity-90 transition-opacity"
           >
             Launch Dashboard →
           </button>
@@ -71,7 +71,7 @@ export default function LandingPage({ onEnter }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl mb-20">
           {STATS.map((s) => (
             <div key={s.label} className="panel p-4">
-              <div className="text-2xl font-semibold text-[var(--accent)]">{s.value}</div>
+              <div className="text-2xl font-semibold text-[var(--accent-blue)]">{s.value}</div>
               <div className="text-xs text-[var(--text-dim)] mt-1">{s.label}</div>
             </div>
           ))}
@@ -83,14 +83,14 @@ export default function LandingPage({ onEnter }) {
           </h2>
           <div className="grid md:grid-cols-2 gap-4 text-left">
             <div className="panel p-5">
-              <div className="text-sm font-medium text-[var(--accent)] mb-2">For Fleet Operators</div>
+              <div className="text-sm font-medium text-[var(--accent-blue)] mb-2">For Fleet Operators</div>
               <p className="text-sm text-[var(--text-dim)]">
                 Manage EV procurement, battery lifecycle, and maintenance operations with the same
                 rigour applied to conventional industrial equipment.
               </p>
             </div>
             <div className="panel p-5">
-              <div className="text-sm font-medium text-[var(--accent)] mb-2">For EV Manufacturers</div>
+              <div className="text-sm font-medium text-[var(--accent-blue)] mb-2">For EV Manufacturers</div>
               <p className="text-sm text-[var(--text-dim)]">
                 Manage complex, quality-critical battery material supply chains — lithium, cobalt,
                 nickel sourcing and multi-tier supplier risk.
@@ -99,8 +99,8 @@ export default function LandingPage({ onEnter }) {
           </div>
         </div>
 
-        <div className="w-full max-w-3xl mb-20 panel p-6 border-l-4 border-l-[var(--accent)] text-left">
-          <div className="text-xs uppercase tracking-wide text-[var(--accent)] mb-2">What makes this different</div>
+        <div className="w-full max-w-3xl mb-20 panel p-6 border-l-4 border-l-[var(--accent-blue)] text-left">
+          <div className="text-xs uppercase tracking-wide text-[var(--accent-blue)] mb-2">What makes this different</div>
           <p className="text-sm text-[var(--text-dim)]">
             Most fleet tools treat procurement and supply chain as separate dashboards. Here, a
             vehicle's EV recommendation is <span className="text-[var(--text)]">directly informed</span> by

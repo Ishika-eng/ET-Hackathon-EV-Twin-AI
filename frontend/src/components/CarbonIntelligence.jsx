@@ -58,9 +58,9 @@ export default function CarbonIntelligence() {
             <XAxis dataKey="vehicle_id" stroke="var(--text-dim)" fontSize={12} />
             <YAxis stroke="var(--text-dim)" fontSize={12} />
             <Tooltip contentStyle={{ background: "var(--panel)", border: "1px solid var(--panel-border)" }} />
-            <Bar dataKey="co2_saved_kg_per_year" fill="#22d3a5" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="co2_saved_kg_per_year" fill="var(--accent)" radius={[4, 4, 0, 0]}>
               {topImpact.data.map((r) => (
-                <Cell key={r.vehicle_id} fill={TYPE_COLORS[r.vehicle_type] || "#22d3a5"} />
+                <Cell key={r.vehicle_id} fill={TYPE_COLORS[r.vehicle_type] || "var(--accent)"} />
               ))}
             </Bar>
           </BarChart>

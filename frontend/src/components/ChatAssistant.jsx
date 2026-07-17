@@ -48,7 +48,7 @@ export default function ChatAssistant() {
                 <button
                   key={s}
                   onClick={() => setInput(s)}
-                  className="text-left text-sm px-3 py-2 rounded-md border border-[var(--panel-border)] hover:border-[var(--accent)] transition-colors"
+                  className="text-left text-sm px-3 py-2 rounded-md border border-[var(--panel-border)] hover:border-[var(--accent-blue)] transition-colors"
                 >
                   {s}
                 </button>
@@ -60,7 +60,7 @@ export default function ChatAssistant() {
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[75%] rounded-xl px-4 py-2 text-sm whitespace-pre-wrap ${
-                m.role === "user" ? "bg-[var(--accent-dim)] text-[var(--text)]" : "bg-[var(--bg)] border border-[var(--panel-border)]"
+                m.role === "user" ? "bg-[var(--accent-blue-dim)] text-[var(--text)]" : "bg-[var(--bg)] border border-[var(--panel-border)]"
               }`}
             >
               {m.content}
@@ -77,12 +77,12 @@ export default function ChatAssistant() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
           placeholder="e.g. Why is vehicle V017 degrading faster than average?"
-          className="flex-1 bg-[var(--bg)] border border-[var(--panel-border)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          className="flex-1 bg-[var(--bg)] border border-[var(--panel-border)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent-blue)]"
         />
         <button
           onClick={send}
           disabled={sending}
-          className="bg-[var(--accent)] text-[var(--bg)] font-medium px-4 py-2 rounded-md text-sm disabled:opacity-50"
+          className="bg-[var(--accent-blue)] text-[var(--bg)] font-medium px-4 py-2 rounded-md text-sm disabled:opacity-50"
         >
           Send
         </button>

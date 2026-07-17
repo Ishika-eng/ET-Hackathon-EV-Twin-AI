@@ -7,8 +7,16 @@
   --panel-border: #223052;
   --text: #e6ebf5;
   --text-dim: #9aa6c4;
-  --accent: #22d3a5;
-  --accent-dim: #14563f;
+
+  /* two-tone EV palette: electric blue is the primary interactive/brand
+     color (buttons, active nav, chat, focus rings); green is reserved for
+     positive/environmental data (CO2 saved, savings, readiness, confidence)
+     -- keeping that mapping distinct instead of one hue for everything */
+  --accent-blue: #3aa3ff;
+  --accent-blue-dim: #123a63;
+  --accent: #26dba8;
+  --accent-dim: #145a42;
+
   --danger: #f6584f;
   --warning: #f5a524;
   --info: #3b82f6;
@@ -54,7 +62,7 @@ button:not(:disabled), a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-blue);
   outline-offset: 2px;
 }
 
@@ -87,5 +95,5 @@ input, select, textarea {
 }
 
 input[type="text"]:focus, input[type="number"]:focus, input[type="search"]:focus, select:focus {
-  border-color: var(--accent) !important;
+  border-color: var(--accent-blue) !important;
 }

@@ -45,7 +45,7 @@ export default function UploadFleet() {
           <a
             href={api.getFleetTemplateUrl()}
             download="fleet_template.csv"
-            className="text-sm px-3 py-2 rounded-md border border-[var(--panel-border)] hover:border-[var(--accent)] transition-colors"
+            className="text-sm px-3 py-2 rounded-md border border-[var(--panel-border)] hover:border-[var(--accent-blue)] transition-colors"
           >
             ⬇ Download CSV template
           </a>
@@ -58,7 +58,7 @@ export default function UploadFleet() {
           <button
             onClick={analyze}
             disabled={!file || loading}
-            className="bg-[var(--accent)] text-[var(--bg)] font-medium px-4 py-2 rounded-md text-sm disabled:opacity-50"
+            className="bg-[var(--accent-blue)] text-[var(--bg)] font-medium px-4 py-2 rounded-md text-sm disabled:opacity-50"
           >
             {loading ? "Analyzing..." : "Analyze Fleet"}
           </button>

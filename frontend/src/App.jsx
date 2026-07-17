@@ -91,7 +91,7 @@ function App() {
                     title={s.subtitle}
                     className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-left border-l-2 ${
                       active === s.id
-                        ? "bg-[var(--accent-dim)] text-[var(--accent)] font-medium border-l-[var(--accent)]"
+                        ? "bg-[var(--accent-blue-dim)] text-[var(--accent-blue)] font-medium border-l-[var(--accent-blue)]"
                         : "text-[var(--text-dim)] border-l-transparent hover:bg-[var(--panel)] hover:text-[var(--text)]"
                     }`}
                   >

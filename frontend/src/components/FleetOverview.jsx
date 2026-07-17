@@ -113,7 +113,7 @@ export default function FleetOverview() {
             <XAxis dataKey="range" stroke="var(--text-dim)" fontSize={12} />
             <YAxis stroke="var(--text-dim)" fontSize={12} />
             <Tooltip contentStyle={{ background: "var(--panel)", border: "1px solid var(--panel-border)" }} />
-            <Bar dataKey="count" fill="#22d3a5" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" fill="var(--accent)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

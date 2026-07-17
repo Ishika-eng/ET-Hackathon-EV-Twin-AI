@@ -18,7 +18,7 @@ export default function ProcurementPlan() {
           max={50}
           value={phaseSize}
           onChange={(e) => setPhaseSize(Number(e.target.value))}
-          className="accent-[var(--accent)]"
+          className="accent-[var(--accent-blue)]"
         />
         <span className="text-sm font-medium w-8">{phaseSize}</span>
       </div>

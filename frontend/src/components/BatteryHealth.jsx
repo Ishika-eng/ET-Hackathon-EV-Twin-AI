@@ -41,16 +41,16 @@ export default function BatteryHealth() {
             <XAxis dataKey="vehicle_id" stroke="var(--text-dim)" fontSize={10} interval={2} />
             <YAxis domain={[0, 100]} stroke="var(--text-dim)" fontSize={12} />
             <Tooltip contentStyle={{ background: "var(--panel)", border: "1px solid var(--panel-border)" }} />
-            <Bar dataKey="current_soh_pct" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="current_soh_pct" fill="var(--accent-blue)" radius={[4, 4, 0, 0]}>
               {chartData.map((r) => (
-                <Cell key={r.vehicle_id} fill={r.thermal_anomaly ? "#f6584f" : "#3b82f6"} />
+                <Cell key={r.vehicle_id} fill={r.thermal_anomaly ? "var(--danger)" : "var(--accent-blue)"} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
         <div className="flex gap-4 text-xs text-[var(--text-dim)] mt-2">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#3b82f6] inline-block" /> Normal</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#f6584f] inline-block" /> Thermal anomaly</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[var(--accent-blue)] inline-block" /> Normal</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[var(--danger)] inline-block" /> Thermal anomaly</span>
         </div>
       </div>
 
