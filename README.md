@@ -3,6 +3,14 @@
 AI digital twin platform for industrial EV fleets and their battery-material supply chains.
 Built for the EY Hackathon (India industrial EV transition challenge).
 
+## Live demo
+
+- **Dashboard:** [et-hackathon-ev-twin-ai.vercel.app](https://et-hackathon-ev-twin-ai.vercel.app/)
+- **API:** [ev-twin-ai-api.onrender.com](https://ev-twin-ai-api.onrender.com) ([`/docs`](https://ev-twin-ai-api.onrender.com/docs) for interactive API docs; the bare root has no page, only `/api/...` routes and `/docs` do)
+
+Backend is on Render's free tier, which spins down after inactivity — if the dashboard looks slow
+or empty on first load, the API is cold-starting (~30-50s); refresh after a moment.
+
 ## What it does
 
 Three agents share one fleet data model, plus an orchestrator that reasons across all of them:
@@ -85,8 +93,9 @@ streamlit run streamlit_app/app.py
 
 ## Deploy
 
-Backend on [Render](https://render.com), frontend on [Vercel](https://vercel.com) — both have free
-tiers and deploy straight from this GitHub repo.
+Currently deployed with backend on [Render](https://render.com) and frontend on
+[Vercel](https://vercel.com) (see [Live demo](#live-demo) above) — both deploy straight from this
+GitHub repo on push to `main`. To stand up your own copy:
 
 **1. Backend (Render)**
 - New → Blueprint → connect this repo. Render reads [`render.yaml`](render.yaml) automatically and
