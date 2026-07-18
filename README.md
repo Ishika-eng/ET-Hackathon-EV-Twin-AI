@@ -11,6 +11,8 @@ Built for the EY Hackathon (India industrial EV transition challenge).
 Backend is on Render's free tier, which spins down after inactivity — if the dashboard looks slow
 or empty on first load, the API is cold-starting (~30-50s); refresh after a moment.
 
+**System architecture diagram:** [`docs/architecture.png`](docs/architecture.png)
+
 ## What it does
 
 Three agents share one fleet data model, plus an orchestrator that reasons across all of them:

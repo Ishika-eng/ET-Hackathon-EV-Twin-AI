@@ -1,0 +1,336 @@
+<style>
+  :root {
+    --bg: #0b1120;
+    --panel: #121a2e;
+    --panel-2: #16203a;
+    --line: #223052;
+    --text: #e6ebf5;
+    --text-dim: #8fa0c4;
+    --blue: #3aa3ff;
+    --blue-dim: #123a63;
+    --green: #26dba8;
+    --green-dim: #12432f;
+    --amber: #f5a524;
+    --amber-dim: #4a3313;
+  }
+  :root[data-theme="light"] {
+    --bg: #eef1f8;
+    --panel: #ffffff;
+    --panel-2: #f3f6fc;
+    --line: #c9d3e6;
+    --text: #101729;
+    --text-dim: #55628a;
+    --blue-dim: #dce9fb;
+    --green-dim: #d9f7ec;
+    --amber-dim: #fdeccb;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #eef1f8;
+      --panel: #ffffff;
+      --panel-2: #f3f6fc;
+      --line: #c9d3e6;
+      --text: #101729;
+      --text-dim: #55628a;
+      --blue-dim: #dce9fb;
+      --green-dim: #d9f7ec;
+      --amber-dim: #fdeccb;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 40px 24px 64px;
+  }
+
+  .wrap { max-width: 1740px; margin: 0 auto; }
+
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue);
+  }
+
+  h1 {
+    font-size: 30px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    margin: 6px 0 8px;
+    text-wrap: balance;
+  }
+
+  .sub {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 68ch;
+    line-height: 1.6;
+    margin: 0 0 28px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 14px 18px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 28px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .legend-swatch { width: 22px; height: 0; border-top-width: 2.5px; border-top-style: solid; flex-shrink: 0; }
+  .legend-swatch.dashed { border-top-style: dashed; }
+
+  .diagram-scroll {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .diagram {
+    position: relative;
+    width: 1650px;
+    height: 1010px;
+  }
+
+  .boundary {
+    position: absolute;
+    border: 1.5px dashed var(--line);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--panel) 40%, transparent);
+  }
+  .boundary-label {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--bg);
+    padding: 0 10px;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--text-dim);
+  }
+
+  .node {
+    position: absolute;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 24px -14px rgba(0,0,0,0.4);
+  }
+  .node-title {
+    font-weight: 600;
+    font-size: 14.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .node-title .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .node-desc { color: var(--text-dim); font-size: 12px; margin-top: 4px; line-height: 1.5; }
+  .node-tag {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 2px 6px;
+    margin: 6px 4px 0 0;
+  }
+
+  .conn-label {
+    position: absolute;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--bg);
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+  .conn-label.amber { color: var(--amber); font-weight: 600; }
+
+  .callout {
+    margin-top: 28px;
+    padding: 18px 22px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--amber);
+    border-radius: 10px;
+  }
+  .callout-title {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .callout p { margin: 0; color: var(--text-dim); font-size: 14px; line-height: 1.6; max-width: 78ch; }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">EV Twin AI — System Architecture</div>
+  <h1>Three agents, one shared data model, and a coupling that most competing designs won't have</h1>
+  <p class="sub">
+    React dashboard on Vercel, FastAPI backend on Render, four cooperating agents, and a synthetic
+    (or user-uploaded) fleet data layer. The one connector drawn in amber is the platform's core
+    differentiator — everything else is standard request flow.
+  </p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="border-color:var(--blue)"></span> Request / data flow (REST)</div>
+    <div class="legend-item"><span class="legend-swatch dashed" style="border-color:var(--text-dim)"></span> Agent tool-call / reasoning</div>
+    <div class="legend-item"><span class="legend-swatch" style="border-color:var(--green)"></span> Reads from data layer</div>
+    <div class="legend-item"><span class="legend-swatch" style="border-color:var(--amber);border-top-width:3px"></span> Cross-agent coupling (differentiator)</div>
+  </div>
+
+  <div class="diagram-scroll">
+  <div class="diagram">
+    <svg width="1650" height="1010" style="position:absolute;top:0;left:0;pointer-events:none;" aria-hidden="true">
+      <defs>
+        <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--blue)"/></marker>
+        <marker id="arrow-dim" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker>
+        <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--green)"/></marker>
+        <marker id="arrow-amber" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--amber)"/></marker>
+      </defs>
+
+      <!-- User -> Frontend -->
+      <line x1="700" y1="70" x2="700" y2="149" stroke="var(--blue)" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+      <!-- Frontend -> API -->
+      <line x1="700" y1="271" x2="700" y2="379" stroke="var(--blue)" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+      <!-- API -> Orchestrator -->
+      <line x1="700" y1="451" x2="700" y2="499" stroke="var(--blue)" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+      <!-- API -> agents bus (offset trunk at x=900, clear of orchestrator box) -->
+      <polyline points="900,451 900,611 310,611 310,629" fill="none" stroke="var(--blue)" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
+      <polyline points="900,611 700,611 700,629" fill="none" stroke="var(--blue)" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
+      <polyline points="900,611 1090,611 1090,629" fill="none" stroke="var(--blue)" stroke-width="1.75" marker-end="url(#arrow-blue)"/>
+
+      <!-- Orchestrator -> 3 agents (dashed tool calls) -->
+      <line x1="630" y1="581" x2="340" y2="629" stroke="var(--text-dim)" stroke-width="1.75" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+      <line x1="700" y1="581" x2="700" y2="629" stroke="var(--text-dim)" stroke-width="1.75" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+      <line x1="770" y1="581" x2="1060" y2="629" stroke="var(--text-dim)" stroke-width="1.75" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+
+      <!-- Orchestrator -> Groq -->
+      <line x1="840" y1="538" x2="1329" y2="538" stroke="var(--text-dim)" stroke-width="1.75" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+
+      <!-- Differentiator: Procurement <-> Supply Chain, amber arc under the row -->
+      <path d="M 310,741 C 310,805 1090,805 1090,741" fill="none" stroke="var(--amber)" stroke-width="2.5" marker-end="url(#arrow-amber)" marker-start="url(#arrow-amber)"/>
+
+      <!-- Data layer -> agents -->
+      <line x1="430" y1="839" x2="350" y2="741" stroke="var(--green)" stroke-width="2" marker-end="url(#arrow-green)"/>
+      <line x1="430" y1="839" x2="700" y2="741" stroke="var(--green)" stroke-width="1.5" stroke-opacity="0.55"/>
+      <line x1="430" y1="839" x2="1000" y2="741" stroke="var(--green)" stroke-width="1.5" stroke-opacity="0.55"/>
+
+      <!-- Upload path -> Procurement -->
+      <path d="M 995,839 C 995,780 400,790 340,745" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow-green)"/>
+    </svg>
+
+    <!-- Boundaries -->
+    <div class="boundary" style="left:200px;top:110px;width:1000px;height:180px;">
+      <div class="boundary-label">VERCEL — STATIC HOSTING</div>
+    </div>
+    <div class="boundary" style="left:110px;top:340px;width:1180px;height:640px;">
+      <div class="boundary-label">RENDER — PYTHON WEB SERVICE</div>
+    </div>
+
+    <!-- User -->
+    <div class="node" style="left:580px;top:20px;width:240px;height:50px;text-align:center;">
+      <div class="node-title" style="justify-content:center;">Fleet Operator / Browser</div>
+    </div>
+
+    <!-- Frontend -->
+    <div class="node" style="left:250px;top:150px;width:900px;height:120px;">
+      <div class="node-title"><span class="dot" style="background:var(--blue)"></span>React Dashboard <span style="color:var(--text-dim);font-weight:400;">(Vite + Tailwind + Recharts)</span></div>
+      <div class="node-desc">Landing page gates entry to 7 sections, each an independent fetch — no shared client state.</div>
+      <div>
+        <span class="node-tag">Upload Fleet</span><span class="node-tag">Fleet Overview</span><span class="node-tag">Procurement Plan</span><span class="node-tag">Digital Twin</span><span class="node-tag">Battery Health</span><span class="node-tag">Supply Chain Risk</span><span class="node-tag">Carbon Intel</span><span class="node-tag">Ask the Fleet</span>
+      </div>
+    </div>
+
+    <!-- API -->
+    <div class="node" style="left:210px;top:380px;width:980px;height:70px;display:flex;align-items:center;justify-content:space-between;">
+      <div class="node-title"><span class="dot" style="background:var(--blue)"></span>FastAPI REST Layer</div>
+      <div class="node-desc" style="margin-top:0;">CORS open · pandas→JSON via <code style="font-family:inherit">to_json</code> (NaN-safe) · auto-generates data on cold boot</div>
+    </div>
+
+    <!-- Orchestrator -->
+    <div class="node" style="left:560px;top:500px;width:280px;height:80px;">
+      <div class="node-title"><span class="dot" style="background:var(--text)"></span>Orchestrator Agent</div>
+      <div class="node-desc">Tool-calls the 3 agents below to answer cross-domain questions</div>
+    </div>
+
+    <!-- Groq external -->
+    <div class="node" style="left:1330px;top:505px;width:280px;height:70px;border-style:dashed;">
+      <div class="node-title"><span class="dot" style="background:var(--text-dim)"></span>Groq API <span style="color:var(--text-dim);font-weight:400;">(external)</span></div>
+      <div class="node-desc">Llama 3.3 70B · reasoning &amp; narration only, never the numbers</div>
+    </div>
+
+    <!-- Procurement -->
+    <div class="node" style="left:150px;top:630px;width:320px;height:110px;">
+      <div class="node-title"><span class="dot" style="background:var(--green)"></span>Procurement Agent</div>
+      <div class="node-desc">Readiness scoring · OEM matching · ROI/payback · confidence score</div>
+      <div class="node-tag">+ Carbon Intelligence</div>
+    </div>
+
+    <!-- Fleet Health -->
+    <div class="node" style="left:540px;top:630px;width:320px;height:110px;">
+      <div class="node-title"><span class="dot" style="background:var(--green)"></span>Fleet Health Agent <span style="color:var(--text-dim);font-weight:400;font-size:12px;">(APM)</span></div>
+      <div class="node-desc">SOH / RUL prediction · thermal anomaly detection</div>
+      <div class="node-tag">validated: MAE ±0.45%</div>
+    </div>
+
+    <!-- Supply Chain -->
+    <div class="node" style="left:930px;top:630px;width:320px;height:110px;">
+      <div class="node-title"><span class="dot" style="background:var(--green)"></span>Supply Chain Risk Agent</div>
+      <div class="node-desc">Supplier risk scoring · concentration flags</div>
+      <div class="node-tag">~38 days earlier detection</div>
+    </div>
+
+    <!-- Data layer -->
+    <div class="node" style="left:150px;top:840px;width:560px;height:130px;">
+      <div class="node-title"><span class="dot" style="background:var(--green)"></span>Synthetic Data Generator</div>
+      <div class="node-desc">Fixed-seed, reproducible — stands in for real telematics/BMS/ERP feeds</div>
+      <div>
+        <span class="node-tag">fleet_vehicles.csv</span><span class="node-tag">oem_catalog.csv</span><span class="node-tag">battery_telemetry.csv</span><span class="node-tag">suppliers.csv</span><span class="node-tag">supply_events.csv</span>
+      </div>
+    </div>
+
+    <!-- Upload path -->
+    <div class="node" style="left:740px;top:840px;width:510px;height:130px;border-style:dashed;">
+      <div class="node-title"><span class="dot" style="background:var(--green)"></span>User-Uploaded Fleet CSV</div>
+      <div class="node-desc">Validated + schema-normalized at <code style="font-family:inherit">/api/procurement/upload</code> — lets a real operator analyze their own fleet instead of the demo data, with region-specific assumption overrides (electricity price, emission factors, charger power).</div>
+    </div>
+
+    <!-- Connector labels -->
+    <div class="conn-label" style="left:715px;top:300px;">REST · JSON (VITE_API_URL)</div>
+    <div class="conn-label" style="left:930px;top:455px;">direct per-agent endpoints</div>
+    <div class="conn-label" style="left:568px;top:460px;">/api/chat</div>
+    <div class="conn-label amber" style="left:600px;top:772px;">battery supply risk → confidence score</div>
+    <div class="conn-label" style="left:445px;top:800px;">reads fleet + telemetry + supplier CSVs</div>
+  </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">The one connector that matters most</div>
+    <p>
+      Most competing designs would draw Procurement and Supply Chain as two dashboards that happen to
+      share a chat box. Here they're wired together directly: the Procurement Agent's OEM recommendation
+      calls into the Supply Chain Agent's material-risk lookup, and a vehicle's confidence score is
+      penalized (up to 20 points) when its recommended battery cell chemistry traces back to a high-risk
+      supplier base — visible on every readiness score, not buried on a separate tab.
+    </p>
+  </div>
+</div>
