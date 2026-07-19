@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Download, PlayCircle, AlertTriangle } from "lucide-react";
+import { Download, PlayCircle, AlertTriangle, RotateCcw } from "lucide-react";
 import { api } from "../api";
 import { useFetch } from "../useFetch";
 import MetricCard from "./MetricCard";
 import Button from "./Button";
 import { ErrorBanner } from "./Loading";
 
-export default function UploadFleet() {
+export default function UploadFleet({ onUploadSuccess, onResetToDemo, datasetActive }) {
   const segments = useFetch(() => api.getKnownSegments(), []);
   const [file, setFile] = useState(null);
   const [assumptions, setAssumptions] = useState({
@@ -27,6 +27,7 @@ export default function UploadFleet() {
     try {
       const data = await api.uploadFleet(file, assumptions);
       setResult(data);
+      onUploadSuccess?.();
     } catch (err) {
       setError(err?.response?.data?.detail || err.message || "Upload failed");
     } finally {
@@ -39,8 +40,11 @@ export default function UploadFleet() {
       <div className="panel p-5">
         <h3 className="text-sm font-medium mb-2">Analyze your own fleet</h3>
         <p className="text-sm text-[var(--text-dim)] mb-4">
-          Upload a CSV of your real fleet to run it through the Procurement Agent — everything
-          on the Fleet Overview / Procurement Plan tabs uses bundled demo data, this uses yours.
+          Upload a CSV of your real fleet to run it through the Procurement Agent. Once analyzed, it
+          becomes the active dataset across Fleet Overview, Procurement Plan, Digital Twin, Carbon
+          Intelligence, and chat — until you reset it. Battery Health and Supply Chain Risk always
+          show the demo data, since they depend on telemetry and supplier data your fleet CSV doesn't
+          contain.
         </p>
 
         <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -60,6 +64,14 @@ export default function UploadFleet() {
           <Button onClick={analyze} disabled={!file || loading} icon={PlayCircle}>
             {loading ? "Analyzing..." : "Analyze Fleet"}
           </Button>
+          {datasetActive && (
+            <button
+              onClick={onResetToDemo}
+              className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-[var(--panel-border)] hover:border-[var(--accent-blue)] text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
+            >
+              <RotateCcw size={14} strokeWidth={2.25} /> Reset to demo data
+            </button>
+          )}
         </div>
 
         {!segments.loading && !segments.error && (

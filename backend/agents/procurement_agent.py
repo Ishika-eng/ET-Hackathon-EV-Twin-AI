@@ -9,6 +9,7 @@ hardcoded constants, since those vary by state and change over time.
 """
 import os
 import pandas as pd
+from backend import state
 from backend.config import DATA_DIR
 from backend.agents.supply_chain_agent import material_risk_lookup, material_risk_tier as supply_risk_tier
 
@@ -200,6 +201,8 @@ def analyze_fleet(fleet_df=None, oem_df=None, assumptions=None, return_meta=Fals
     are unaffected since this defaults to False.
     """
     assumptions = {**DEFAULT_ASSUMPTIONS, **(assumptions or {})}
+    if fleet_df is None:
+        fleet_df = state.get_active_fleet()  # last-uploaded fleet, if one is active
     if fleet_df is None:
         fleet, oem = _load()
     else:

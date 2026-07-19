@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { RotateCcw } from "lucide-react";
 import LandingPage from "./components/LandingPage";
 import UploadFleet from "./components/UploadFleet";
 import FleetOverview from "./components/FleetOverview";
@@ -9,6 +10,7 @@ import SupplyChainRisk from "./components/SupplyChainRisk";
 import CarbonIntelligence from "./components/CarbonIntelligence";
 import ChatAssistant from "./components/ChatAssistant";
 import { SECTION_ICONS, LogoIcon } from "./icons";
+import { api } from "./api";
 
 const NAV_GROUPS = [
   {
@@ -56,9 +58,30 @@ const ALL_SECTIONS = NAV_GROUPS.flatMap((g) => g.items);
 function App() {
   const [entered, setEntered] = useState(false);
   const [active, setActive] = useState("fleet");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [activeDataset, setActiveDataset] = useState(null);
   const activeSection = ALL_SECTIONS.find((s) => s.id === active);
   const ActiveComponent = activeSection.component;
   const ActiveIcon = SECTION_ICONS[active];
+
+  useEffect(() => {
+    if (!entered) return;
+    api.getActiveDataset().then(setActiveDataset).catch(() => setActiveDataset(null));
+  }, [entered, active, refreshKey]);
+
+  // after a successful upload: just refresh the banner -- the Upload tab
+  // already shows fresh results itself, no need to force a remount there
+  const refreshDatasetBanner = () => {
+    api.getActiveDataset().then(setActiveDataset).catch(() => {});
+  };
+
+  // after a reset: refresh the banner AND force whatever tab is open to
+  // refetch immediately, since its currently-displayed data is now stale
+  const resetToDemo = async () => {
+    await api.resetToDemo();
+    refreshDatasetBanner();
+    setRefreshKey((k) => k + 1);
+  };
 
   if (!entered) {
     return <LandingPage onEnter={() => setEntered(true)} />;
@@ -120,10 +143,28 @@ function App() {
             {activeSection.label}
           </h1>
           <p className="text-sm text-[var(--text-dim)] mt-1">{activeSection.subtitle}</p>
+
+          {activeDataset?.active && (
+            <div className="mt-3 flex flex-wrap items-center gap-2.5 px-3 py-2 rounded-lg bg-[var(--accent-dim)] border border-[var(--accent)]/40 text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0" />
+              <span className="text-[var(--text)]">
+                Using your uploaded fleet — <strong>{activeDataset.vehicle_count} vehicles</strong> from{" "}
+                <span className="font-mono">{activeDataset.filename}</span>. Fleet Overview, Procurement Plan,
+                Digital Twin, Carbon Intelligence, and chat reflect it; Battery Health and Supply Chain Risk don't
+                (different data entirely).
+              </span>
+              <button
+                onClick={resetToDemo}
+                className="ml-auto shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[var(--panel-border)] hover:border-[var(--accent-blue)] text-[var(--text-dim)] hover:text-[var(--text)] transition-colors"
+              >
+                <RotateCcw size={12} strokeWidth={2.25} /> Reset to demo data
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          <div key={active} className="max-w-[1400px] mx-auto px-6 md:px-8 pb-8 h-full animate-fade-in">
-            <ActiveComponent />
+          <div key={`${active}-${refreshKey}`} className="max-w-[1400px] mx-auto px-6 md:px-8 pb-8 h-full animate-fade-in">
+            <ActiveComponent onUploadSuccess={refreshDatasetBanner} onResetToDemo={resetToDemo} datasetActive={activeDataset?.active} />
           </div>
         </div>
       </main>

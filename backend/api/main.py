@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 
+from backend import state
 from backend.config import DATA_DIR
 from backend.agents import procurement_agent, fleet_health_agent, supply_chain_agent, carbon_intelligence, orchestrator
 
@@ -124,6 +125,12 @@ async def upload_fleet(
     }
 
     df, meta = procurement_agent.analyze_fleet(fleet_df=clean_df, assumptions=assumptions_override, return_meta=True)
+
+    # make this the active dataset -- Fleet Overview, Procurement Plan,
+    # Digital Twin's diesel view, Carbon Intelligence, and the chat
+    # orchestrator's procurement tools will now reflect it too, until reset
+    state.set_active_fleet(clean_df, file.filename or "uploaded.csv")
+
     return {
         "results": df_records(df),
         "warnings": schema_warnings,
@@ -132,6 +139,22 @@ async def upload_fleet(
         "vehicles_analyzed": len(df),
         "vehicles_submitted": len(uploaded_df),
     }
+
+
+@app.post("/api/procurement/reset-to-demo")
+def reset_to_demo():
+    """Clear the active uploaded fleet -- every procurement-dependent view
+    reverts to the bundled demo data on its next fetch."""
+    state.clear_active_fleet()
+    return {"status": "reset", "source": "demo"}
+
+
+@app.get("/api/procurement/active-dataset")
+def get_active_dataset():
+    """Which dataset Fleet Overview / Procurement Plan / Digital Twin /
+    Carbon Intelligence / chat are currently reading from -- lets the
+    frontend show an unambiguous indicator instead of a silent switch."""
+    return state.get_active_dataset_info()
 
 
 @app.get("/api/health/fleet")

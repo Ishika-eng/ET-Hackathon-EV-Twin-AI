@@ -13,6 +13,8 @@ export const api = {
     client.get("/procurement/plan", { params: { phase_size: phaseSize } }).then((r) => r.data),
   getKnownSegments: () => client.get("/procurement/known-segments").then((r) => r.data),
   getFleetTemplateUrl: () => `${API_BASE}/procurement/template`,
+  getActiveDataset: () => client.get("/procurement/active-dataset").then((r) => r.data),
+  resetToDemo: () => client.post("/procurement/reset-to-demo").then((r) => r.data),
   uploadFleet: (file, assumptions = {}) => {
     const form = new FormData();
     form.append("file", file);
