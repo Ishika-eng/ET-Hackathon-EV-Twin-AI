@@ -74,7 +74,15 @@ def get_fleet_csv_template():
         ["V002", "Freight Truck", "220", "6.5", "10", "6", "32", "24000", "92.5", "12", "Chennai"],
     ]
     lines = [",".join(TEMPLATE_COLUMN_ORDER)] + [",".join(row) for row in example_rows]
-    return "\n".join(lines) + "\n"
+    content = "\n".join(lines) + "\n"
+    # Content-Disposition forces a real download instead of an inline text
+    # view -- without it, browsers ignore the frontend link's `download`
+    # attribute for a cross-origin URL (Vercel -> Render) and just render
+    # the CSV as a page of text
+    return PlainTextResponse(
+        content,
+        headers={"Content-Disposition": 'attachment; filename="fleet_template.csv"'},
+    )
 
 
 @app.get("/api/procurement/known-segments")
